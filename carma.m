@@ -1,9 +1,9 @@
-function varargout = crs(varargin)
+function varargout = carma(varargin)
 gui_Singleton = 0;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @crs_OpeningFcn, ...
-                   'gui_OutputFcn',  @crs_OutputFcn, ...
+                   'gui_OpeningFcn', @carma_OpeningFcn, ...
+                   'gui_OutputFcn',  @carma_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -17,7 +17,7 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-function crs_OpeningFcn(hObject, ~, handles, varargin)
+function carma_OpeningFcn(hObject, ~, handles, varargin)
     handles.output = hObject;
     handles.opening = 1;
     axctl = actxcontrollist;
@@ -31,7 +31,7 @@ function crs_OpeningFcn(hObject, ~, handles, varargin)
     handles.opening = 0;
     guidata(hObject, handles);
 
-function varargout = crs_OutputFcn(hObject, ~, handles) 
+function varargout = carma_OutputFcn(hObject, ~, handles) 
     varargout{1} = handles.output;
 
 function open_file_Callback(hObject, ~, handles)
@@ -60,7 +60,7 @@ function settings_Callback(hObject, ~, handles)
     prompt = inputdlg({'Top Axis Label:','Bottom Axis Label:','Slider Minimum Value:','Slider Maximum Value:','Axis Type (1=Unipolar, 2=Bipolar):','Samples per Second'},'Settings',1);
     if isempty(prompt)
         if handles.opening==1
-            choice = questdlg('All options must be specified. Continue?','Continuous Rating Software','Continue','Close','Continue');
+            choice = questdlg('All options must be specified. Continue?','CARMA','Continue','Close','Continue');
             switch choice
                 case 'Continue'
                     settings_Callback(hObject,[],handles);
@@ -118,7 +118,7 @@ function settings_Callback(hObject, ~, handles)
     guidata(hObject, handles);
 
 function about_Callback(hObject, ~, handles)
-    msgbox(sprintf('Continuous Rating Software v2.31\nJeffrey M Girard <jmg174@pitt.edu>\nUniversity of Pittsburgh\nhttp://www.pitt.edu/~jmg174'),'About CRS','help');
+    msgbox(sprintf('Continuous Affect Rating and Media Annotation\nhttp://carma.codeplex.com/\nVersion 1.00 <04-06-2014>'),'About CARMA','help');
 
 function playpause_Callback(hObject, ~, handles)
     if get(hObject,'value')
@@ -144,7 +144,8 @@ function playpause_Callback(hObject, ~, handles)
     save_rating(handles);
     
 function save_rating(handles)
-    [filename,pathname] = uiputfile({'*.xls; *.xlsx','Excel Spreadsheets (*.xls, *.xlsx)';'*.csv','Comma-Separated Values (*.csv)'},'Save as',sprintf('%s_%ssps',get(handles.filename,'string'),get(handles.sample,'string')));
+    [~,defaultname,~] = fileparts(get(handles.filename,'string'));
+    [filename,pathname] = uiputfile({'*.xls; *.xlsx','Excel Spreadsheets (*.xls, *.xlsx)';'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
     if ~isequal(filename,0) && ~isequal(pathname,0)
         rating = handles.rating;
         output = [...
@@ -158,7 +159,7 @@ function save_rating(handles)
             xlswrite(fullfile(pathname,filename),rating);
         end
     else
-        choice = questdlg('You are about to exit without saving.','Continuous Rating Software','Exit','Save','Save');
+        choice = questdlg('You are about to close without saving.','CARMA','Close','Save','Save');
         switch choice
             case 'Exit'
             case 'Save'

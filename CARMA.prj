@@ -1,32 +1,32 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="3082857010" file="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CRS.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0" name="CRS" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CRS\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
-    <param.appname>CRS</param.appname>
+  <configuration build-checksum="1706751409" file="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0" name="CARMA" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+    <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>2.31</param.version>
+    <param.version>1.00</param.version>
     <param.authnamewatermark>Jeffrey M Girard</param.authnamewatermark>
     <param.email>jmg174@pitt.edu</param.email>
     <param.company>University of Pittsburgh</param.company>
-    <param.summary>Continuous Rating Software</param.summary>
-    <param.description>Rate audio and video files over time using a mouse-controlled slider</param.description>
+    <param.summary>Continuous Affect Rating and Media Annotation</param.summary>
+    <param.description>Researchers in affective computing, human-computer interaction, and the social sciences have long been interested in perceived and experienced emotion. Measurement of these affective constructs is frequently accomplished by collecting holistic ratings at the end of a task, often using discrete emotion categories. However, both subjective experience and observable behavior unfold over time and across numerous affective dimensions. In order to capture all the shifting nuance of such unfolding, affective measurement must be continuous. CARMA is a media annotation program that collects continuous ratings while displaying audio and video files. It is designed to be highly user-friendly and easily customizable. It is written in MATLAB code and is available at http://carma.codeplex.com/.</param.description>
     <param.screenshot />
     <param.guid />
-    <param.installpath.string>\ContinuousRatingSoftware\</param.installpath.string>
+    <param.installpath.string>\CARMA</param.installpath.string>
     <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
     <param.logo />
     <param.install.notes />
-    <param.intermediate>${PROJECT_ROOT}\CRS\for_testing</param.intermediate>
-    <param.output>${PROJECT_ROOT}\CRS\for_redistribution</param.output>
+    <param.intermediate>${PROJECT_ROOT}\CARMA\for_testing</param.intermediate>
+    <param.output>${PROJECT_ROOT}\CARMA\for_redistribution</param.output>
     <param.user.defined.mcr.options />
     <param.embed.ctf>true</param.embed.ctf>
-    <param.server.ctf>${PROJECT_ROOT}\CRS\for_testing\.ctf</param.server.ctf>
-    <param.server.readme>${PROJECT_ROOT}\CRS\for_testing\readme.txt</param.server.readme>
+    <param.server.ctf>${PROJECT_ROOT}\CARMA\for_testing\.ctf</param.server.ctf>
+    <param.server.readme>${PROJECT_ROOT}\CARMA\for_testing\readme.txt</param.server.readme>
     <param.target.type>subtarget.standalone</param.target.type>
     <param.support.packages />
     <param.web.mcr>true</param.web.mcr>
     <param.package.mcr>false</param.package.mcr>
     <param.no.mcr>false</param.no.mcr>
-    <param.web.mcr.name>CRS_Installer</param.web.mcr.name>
+    <param.web.mcr.name>CARMA_Installer</param.web.mcr.name>
     <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
     <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
     <param.windows.command.prompt>true</param.windows.command.prompt>
@@ -60,18 +60,18 @@
       <param.log.file />
     </unset>
     <fileset.main>
-      <file>${PROJECT_ROOT}\crs.m</file>
+      <file>${PROJECT_ROOT}\carma.m</file>
     </fileset.main>
     <fileset.resources>
-      <file>${PROJECT_ROOT}\crs.fig</file>
+      <file>${PROJECT_ROOT}\carma.fig</file>
       <file>${PROJECT_ROOT}\gradient1_450.png</file>
       <file>${PROJECT_ROOT}\gradient2_450.png</file>
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\CRS\for_testing" name="readme.txt" optional="true">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CRS\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\CRS\for_testing" name="splash.png" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CRS\for_testing\splash.png</file>
-      <file location="${PROJECT_ROOT}\CRS\for_testing" name="CRS.exe" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CRS\for_testing\CRS.exe</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA\for_testing\CARMA.exe</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="splash.png" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA\for_testing\readme.txt</file>
     </build-deliverables>
     <workflow />
     <matlab>
