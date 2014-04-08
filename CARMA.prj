@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="1706751409" file="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0" name="CARMA" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+  <configuration build-checksum="1865034992" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="CARMA" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
@@ -69,9 +69,9 @@
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA\for_testing\CARMA.exe</file>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="splash.png" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA\for_testing\splash.png</file>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">Z:\Jeff Girard\Software\Continuous_Measurement\CRS Rating 2.0\CARMA\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\CARMA.exe</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="splash.png" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\splash.png</file>
     </build-deliverables>
     <workflow />
     <matlab>

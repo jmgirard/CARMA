@@ -57,68 +57,114 @@ function open_file_Callback(hObject, ~, handles)
     guidata(hObject, handles);
 
 function settings_Callback(hObject, ~, handles)
-    prompt = inputdlg({'Top Axis Label:','Bottom Axis Label:','Slider Minimum Value:','Slider Maximum Value:','Axis Type (1=Unipolar, 2=Bipolar):','Samples per Second'},'Settings',1);
+    if handles.opening==1
+        defaults = {'very negative','very positive','1','9','9','2','1'};
+        prompt = inputdlg({'Axis Lower Label:','Axis Upper Label:','Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:','Image (1=Unipolar, 2=Bipolar, 3=Custom):','Samples per Second:'},'Settings',1,defaults);
+    else
+        defaults = {...
+            get(handles.botlabel,'String'),...
+            get(handles.toplabel,'String'),...
+            num2str(get(handles.slider,'Min')),...
+        	num2str(get(handles.slider,'Max')),...
+            get(handles.steps,'String'),...
+        	get(handles.axisimage,'String'),...
+            get(handles.sample,'String')};
+        prompt = inputdlg({'Axis Lower Label:','Axis Upper Label:','Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:','Image (1=Unipolar, 2=Bipolar, 3=Custom):','Samples per Second:'},'Settings',1,defaults);
+    end
     if isempty(prompt)
         if handles.opening==1
-            choice = questdlg('All options must be specified. Continue?','CARMA','Continue','Close','Continue');
+            choice = questdlg('All options must be specified. Continue?','CARMA','Continue','Exit','Continue');
             switch choice
                 case 'Continue'
                     settings_Callback(hObject,[],handles);
-                case 'Close'
-                    quit force;
+                case 'Exit'
+                    quit;
             end
         else
             return;
         end
     end
-    if isempty(prompt{1}) || isempty(prompt{2}) || isempty(prompt{3}) || isempty(prompt{4}) || isempty(prompt{5}) || isempty(prompt{6})
+    if isempty(prompt{1}) || isempty(prompt{2}) || isempty(prompt{3}) || isempty(prompt{4}) || isempty(prompt{5}) || isempty(prompt{6}) || isempty(prompt{7})
         serror = errordlg('All options must be specified.');
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
     end
     if str2double(prompt{3})>=str2double(prompt{4})
-        serror = errordlg('Slider Maximum must be greater than Slider Minimum.');
+        serror = errordlg('Axis Maximum must be greater than Axis Minimum.');
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
     end
-    if str2double(prompt{5})~= 1 && str2double(prompt{5})~=2
-        serror = errordlg('Axis Type must be 1 or 2.');
+    if isnan(str2double(prompt{5}))
+        serror = errordlg('Number of Axis Steps must be numerical.');
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
     end
-    if str2double(prompt{6})<0
-        serror = errordlg('Sampling rate must be greater than 0 per second.');
+    if str2double(prompt{5})<=1 || ceil(str2double(prompt{5}))~=floor(str2double(prompt{5}))
+        serror = errordlg('Number of Axis Steps must be a positive integer greater than 1.');
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
     end
-    if str2double(prompt{6})>30
-        serror = errordlg('Sampling rate must be less than 30 per second.');
+    if str2double(prompt{6})~= 1 && str2double(prompt{6})~=2 && str2double(prompt{6})~=3
+        serror = errordlg('Image must be 1, 2, or 3.');
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
     end
-    set(handles.toplabel,'String',prompt{1});
-    set(handles.botlabel,'String',prompt{2});
-    set(handles.slider,'Value',str2double(prompt{4})-(str2double(prompt{4})-str2double(prompt{3}))/2,'Min',str2double(prompt{3}),'Max',str2double(prompt{4}));
-    if str2double(prompt{5})==2
-        image(imread('gradient2_450.png'));
-    elseif str2double(prompt{5})==1
+    if isnan(str2double(prompt{7}))
+        serror = errordlg('Samples per Second must be numerical.');
+        uiwait(serror); settings_Callback(hObject,[],handles);
+        return;
+    end
+    if str2double(prompt{7})<=0
+        serror = errordlg('Samples per Second must be greater than 0.');
+        uiwait(serror); settings_Callback(hObject,[],handles);
+        return;
+    end
+    if str2double(prompt{7})>30
+        serror = errordlg('Samples per Second must be less than 30.');
+        uiwait(serror); settings_Callback(hObject,[],handles);
+        return;
+    end
+    set(handles.botlabel,'String',prompt{1});
+    set(handles.toplabel,'String',prompt{2});
+    set(handles.steps,'String',prompt{5});
+    set(handles.axisimage,'String',prompt{6});
+    set(handles.sample,'String',prompt{7});
+    steps = str2double(prompt{5});
+    set(handles.slider,...
+        'Min',str2double(prompt{3}),...
+        'Max',str2double(prompt{4}),...
+        'SliderStep',[1/(steps-1) 1/(steps-1)]);
+    axes(handles.gaxis);
+    if str2double(prompt{6})==1
         image(imread('gradient1_450.png'));
+        set(handles.slider,'Value',str2double(prompt{3}));
+    elseif str2double(prompt{6})==2
+        image(imread('gradient2_450.png'));
+        set(handles.slider,'Value',str2double(prompt{4})-(str2double(prompt{4})-str2double(prompt{3}))/2);
+    elseif str2double(prompt{6})==3
+        set(handles.slider,'Value',str2double(prompt{3}));
+        [imfile,impath] = uigetfile(...
+            {'*.bmp;*.gif;*.hdf;*.jpg;*.jpeg;*.pcx;*.png;*.tif;*.tiff;*.xwd','Image Files (*.bmp;*.gif;*.hdf;*.jpg;*.jpeg;*.pcx;*.png;*.tif;*.tiff;*.xwd)'},...
+            'Select a custom gradient image (450x70 px):');
+        if ~isequal(imfile,0)
+            cgradient = imread(fullfile(impath,imfile));
+            cgradient = imresize(cgradient,[450 70]);
+            image(cgradient);
+        else
+            image(imread('gradient1_450.png'));
+        end
     end
-    h=450; axis ij; hold on;
-    plot([1,5],[h/8,h/8],'k-'); plot([65,70],[h/8,h/8],'k-');
-    plot([1,5],[h/4,h/4],'k-'); plot([65,70],[h/4,h/4],'k-');
-    plot([1,5],[3*h/8,3*h/8],'k-'); plot([65,70],[3*h/8,3*h/8],'k-');
-    plot([1,70],[h/2,h/2],'k-');
-    plot([1,5],[5*h/8,5*h/8],'k-'); plot([65,70],[5*h/8,5*h/8],'k-');
-    plot([1,5],[3*h/4,3*h/4],'k-'); plot([65,70],[3*h/4,3*h/4],'k-');
-    plot([1,5],[7*h/8,7*h/8],'k-'); plot([65,70],[7*h/8,7*h/8],'k-');
-    set(gca,'XTick',[],'YTick',[],'XLim',[0,70],'YLim',[0,h]);
+    axis ij; hold on;
+    for i = 1:steps-1
+        plot([1,5],[450,450]*i/steps,'k-');
+        plot([65,70],[450,450]*i/steps,'k-');
+    end
+    set(gca,'XTick',[],'YTick',[],'XLim',[0,70],'YLim',[0,450]);
     hold off;
-    set(handles.sample,'String',prompt{6});
     guidata(hObject, handles);
 
 function about_Callback(hObject, ~, handles)
-    msgbox(sprintf('Continuous Affect Rating and Media Annotation\nhttp://carma.codeplex.com/\nVersion 1.00 <04-06-2014>'),'About CARMA','help');
+    msgbox(sprintf('Continuous Affect Rating and Media Annotation\nhttp://carma.codeplex.com/\nVersion 1.00 <04-07-2014>\nGNU General Public License v3'),'About CARMA','help');
 
 function playpause_Callback(hObject, ~, handles)
     if get(hObject,'value')
@@ -150,18 +196,27 @@ function save_rating(handles)
         rating = handles.rating;
         output = [...
             {sprintf('Filename: %s',get(handles.filename,'string'))};...
-            {sprintf('Samples per Second: %s',get(handles.sample,'string'))};...
-            {sprintf('Axis Titles: %s to %s',get(handles.botlabel,'string'),get(handles.toplabel,'string'))};...
+            {sprintf('Axis Labels: %s to %s',get(handles.botlabel,'string'),get(handles.toplabel,'string'))};...
             {sprintf('Axis Range: %d to %d',get(handles.slider,'min'),get(handles.slider,'max'))};...
+            {sprintf('Axis Image: %s',get(handles.axisimage,'string'))};...
+            {sprintf('Number of Axis Steps: %s',get(handles.steps,'string'))};...
+            {sprintf('Samples per Second: %s',get(handles.sample,'string'))};...
             num2cell(rating)];
-        [~,message] = xlswrite(fullfile(pathname,filename),output);
-        if strcmp(message.identifier,'MATLAB:xlswrite:dlmwrite')
-            xlswrite(fullfile(pathname,filename),rating);
+        [~,~,ext] = fileparts(filename);
+        if strcmpi(ext,'.XLS') || strcmpi(ext,'.XLSX')
+            [~,message] = xlswrite(fullfile(pathname,filename),output);
+            if strcmp(message.identifier,'MATLAB:xlswrite:dlmwrite')
+                serror = errordlg('Exporting to .XLS/.XLSX requires Microsoft Excel to be installed. CARMA will now export to .CSV instead.');
+                uiwait(serror);
+                csvwrite(fullfile(pathname,filename),rating);
+            end
+        elseif strcmpi(ext,'.CSV')
+            csvwrite(fullfile(pathname,filename),rating);
         end
     else
         choice = questdlg('You are about to close without saving.','CARMA','Close','Save','Save');
         switch choice
-            case 'Exit'
+            case 'Close'
             case 'Save'
                 save_rating(handles);
         end
@@ -169,15 +224,17 @@ function save_rating(handles)
     program_reset(handles);
     
 function program_reset(handles)
-    smin = get(handles.slider,'Min');
-    smax = get(handles.slider,'Max');
     set(handles.report,'string','Open File');
     set(handles.filename,'string','');
     set(handles.duration,'string','');
-    set(handles.playpause,'Value',0,'Enable','Inactive','String','Play');
+    set(handles.playpause,'Value',0,'Enable','off','String','Play');
     set(handles.open_file,'enable','on');
     set(handles.settings,'enable','on');
     set(handles.about,'enable','on');
-    set(handles.slider,'Value',smax-((smax-smin)/2),'Min',smin,'Max',smax);
-    drawnow;
     set(handles.slider,'Enable','Inactive');
+    if strcmp(get(handles.axisimage,'string'),'2')
+        set(handles.slider,'Value',get(handles.slider,'Max')-(get(handles.slider,'Max')-get(handles.slider,'Min'))/2);
+    else
+        set(handles.slider,'Value',get(handles.slider,'Min'));
+    end
+    drawnow;
