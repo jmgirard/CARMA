@@ -58,8 +58,8 @@ function open_file_Callback(hObject, ~, handles)
 
 function settings_Callback(hObject, ~, handles)
     if handles.opening==1
-        defaults = {'very negative','very positive','1','9','9','2','1'};
-        prompt = inputdlg({'Axis Lower Label:','Axis Upper Label:','Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:','Image (1=Unipolar, 2=Bipolar, 3=Custom):','Samples per Second:'},'Settings',1,defaults);
+        defaults = {'very negative','very positive','1','9','9','2','1','1'};
+        prompt = inputdlg({'Axis Lower Label:','Axis Upper Label:','Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:','Image (1=Unipolar, 2=Bipolar, 3=Custom):','Samples per Second:','Break Rating into Segments:'},'Settings',1,defaults);
     else
         defaults = {...
             get(handles.botlabel,'String'),...
@@ -68,8 +68,9 @@ function settings_Callback(hObject, ~, handles)
         	num2str(get(handles.slider,'Max')),...
             get(handles.steps,'String'),...
         	get(handles.axisimage,'String'),...
-            get(handles.sample,'String')};
-        prompt = inputdlg({'Axis Lower Label:','Axis Upper Label:','Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:','Image (1=Unipolar, 2=Bipolar, 3=Custom):','Samples per Second:'},'Settings',1,defaults);
+            get(handles.sample,'String'),...
+            get(handles.segments,'String')};
+        prompt = inputdlg({'Axis Lower Label:','Axis Upper Label:','Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:','Image (1=Unipolar, 2=Bipolar, 3=Custom):','Samples per Second:','Break Video into Segments:'},'Settings',1,defaults);
     end
     if isempty(prompt)
         if handles.opening==1
@@ -84,7 +85,7 @@ function settings_Callback(hObject, ~, handles)
             return;
         end
     end
-    if isempty(prompt{1}) || isempty(prompt{2}) || isempty(prompt{3}) || isempty(prompt{4}) || isempty(prompt{5}) || isempty(prompt{6}) || isempty(prompt{7})
+    if isempty(prompt{1}) || isempty(prompt{2}) || isempty(prompt{3}) || isempty(prompt{4}) || isempty(prompt{5}) || isempty(prompt{6}) || isempty(prompt{7}) || isempty(prompt{8})
         serror = errordlg('All options must be specified.');
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
@@ -94,12 +95,7 @@ function settings_Callback(hObject, ~, handles)
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
     end
-    if isnan(str2double(prompt{5}))
-        serror = errordlg('Number of Axis Steps must be numerical.');
-        uiwait(serror); settings_Callback(hObject,[],handles);
-        return;
-    end
-    if str2double(prompt{5})<=1 || ceil(str2double(prompt{5}))~=floor(str2double(prompt{5}))
+    if isnan(str2double(prompt{5})) || str2double(prompt{5})<=1 || ceil(str2double(prompt{5}))~=floor(str2double(prompt{5}))
         serror = errordlg('Number of Axis Steps must be a positive integer greater than 1.');
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
@@ -124,11 +120,17 @@ function settings_Callback(hObject, ~, handles)
         uiwait(serror); settings_Callback(hObject,[],handles);
         return;
     end
+    if isnan(str2double(prompt{8})) || str2double(prompt{8})<=0 || ceil(str2double(prompt{8}))~=floor(str2double(prompt{8}))
+        serror = errordlg('Number of Segments must be a positive integer.');
+        uiwait(serror); settings_Callback(hObject,[],handles);
+        return;
+    end
     set(handles.botlabel,'String',prompt{1});
     set(handles.toplabel,'String',prompt{2});
     set(handles.steps,'String',prompt{5});
     set(handles.axisimage,'String',prompt{6});
     set(handles.sample,'String',prompt{7});
+    set(handles.segments,'String',prompt{8});
     steps = str2double(prompt{5});
     set(handles.slider,...
         'Min',str2double(prompt{3}),...
@@ -164,30 +166,41 @@ function settings_Callback(hObject, ~, handles)
     guidata(hObject, handles);
 
 function about_Callback(hObject, ~, handles)
-    msgbox(sprintf('Continuous Affect Rating and Media Annotation\nhttp://carma.codeplex.com/\nVersion 1.00 <04-07-2014>\nGNU General Public License v3'),'About CARMA','help');
+    msgbox(sprintf('Continuous Affect Rating and Media Annotation\nhttp://carma.codeplex.com/\nVersion 2.00 <05-05-2014>\nGNU General Public License v3'),'About CARMA','help');
 
 function playpause_Callback(hObject, ~, handles)
-    if get(hObject,'value')
-        set(hObject,'enable','off');
-        set(handles.open_file,'enable','off');
-        set(handles.settings,'enable','off');
-        set(handles.about,'enable','off');
+    set(hObject,'enable','off');
+    set(handles.open_file,'enable','off');
+    set(handles.settings,'enable','off');
+    set(handles.about,'enable','off');
+    segments = str2double(get(handles.segments,'string'));
+    sample = str2double(get(handles.sample,'string'));
+    seconds = handles.dur/segments;
+    for i = 1:segments
         set(handles.report,'string','Get Ready');
         set(hObject,'string','3'); pause(1);
         set(hObject,'string','2'); pause(1);
         set(hObject,'string','1'); pause(1);
         set(hObject,'string','...');
-    end
-    handles.wmp.controls.play();
-    sample = str2double(get(handles.sample,'string'));
-    set(handles.report,'string','Use Slider');
-    for i = 1:ceil(handles.dur*sample)
-        handles.rating = [handles.rating; get(handles.slider,'value')];
+        set(handles.report,'string','Use Slider');
+        temp_ratings = zeros(ceil(seconds*sample),1);
+        handles.wmp.controls.play();
+        for j = 1:ceil(seconds*sample)
+            temp_ratings(j) = get(handles.slider,'value');
+            pause(1/sample);
+        end
+        handles.wmp.controls.pause();
+        handles.rating = [handles.rating; temp_ratings];
         guidata(hObject, handles);
-        pause(1/sample);
+        if i ~= segments
+            resume = msgbox(sprintf('End of rating segment #%02d/%02d\nClick OK when ready to resume.',i,segments),'CARMA');
+            uiwait(resume);
+        end
     end
     set(handles.report,'string','Processing...');
+    guidata(hObject, handles);
     save_rating(handles);
+    handles.wmp.controls.stop();
     
 function save_rating(handles)
     [~,defaultname,~] = fileparts(get(handles.filename,'string'));
@@ -227,7 +240,7 @@ function program_reset(handles)
     set(handles.report,'string','Open File');
     set(handles.filename,'string','');
     set(handles.duration,'string','');
-    set(handles.playpause,'Value',0,'Enable','off','String','Play');
+    set(handles.playpause,'Enable','off','String','Play');
     set(handles.open_file,'enable','on');
     set(handles.settings,'enable','on');
     set(handles.about,'enable','on');
