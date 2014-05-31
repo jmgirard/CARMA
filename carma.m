@@ -193,7 +193,7 @@ function make_changes(Settings,handles)
         plot([1,5],[450,450]*i/axis_steps,'k-'); %Plot left hash-marks on axis
         plot([65,70],[450,450]*i/axis_steps,'k-'); %Plot right hash-marks on axis
     end
-    lin = linspace(axis_min,axis_max,axis_steps);
+    lin = linspace(axis_max,axis_min,axis_steps);
     for i = 1:length(lin)
         text(37.5,(((450*(i-1))/axis_steps)+((450*i)/axis_steps))/2,sprintf('%.2f',lin(i)),'HorizontalAlignment','center');
     end
