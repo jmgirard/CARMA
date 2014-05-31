@@ -86,7 +86,7 @@ function settings_Callback(hObject, ~, handles)
 function about_Callback(hObject, ~, handles)
 %ABOUT_CALLBACK Runs when selecting About menu option
     line1 = 'Continuous Affect Rating and Media Annotation';
-    line2 = 'Version 3.00 <05-30-2014>';
+    line2 = 'Version 3.01 <05-31-2014>';
     line3 = 'Manual: http://carma.codeplex.com/documentation';
     line4 = 'Support: http://carma.codeplex.com/discussion';
     line5 = 'License: http://carma.codeplex.com/license';
@@ -103,17 +103,16 @@ function playpause_Callback(hObject, ~, handles)
     set(hObject,'string','2'); pause(1); %Countdown on Play button
     set(hObject,'string','1'); pause(1); %Countdown on Play button
     set(hObject,'string','...'); %Update Play button
-    set(handles.report,'string','Use Slider'); %Update Report window
     for i = 1:ceil(handles.dur)
         temp = []; %Preallocate temporary ratings vector
         handles.wmp.controls.play(); %Send play command to WMP ActiveX Controller
         pause(0.05); %Pause to make sure video begins playing before starting ratings
-        timer = tic;
+        timer = tic; %Start timer
         while toc(timer) < 1.0
-            temp = [temp; get(handles.slider,'value')];
+            temp = [temp; get(handles.slider,'value')]; %Collect ratings until timer hits 1 sec
         end
-        handles.rating(i) = mean(temp); %Add temporary ratings vector to overall ratings vector
-%         guidata(hObject, handles); %Update GUI data
+        handles.rating(i) = mean(temp); %Add mean rating for that second to ratings vector
+        set(handles.report,'string',datestr(i/24/3600,'HH:MM:SS.FFF')); %Show elapsed time in seconds
     end
     handles.wmp.controls.pause(); %Send pause command to WMP ActiveX Controller
     set(handles.report,'string','Processing...'); %Update Report window
@@ -126,12 +125,15 @@ function save_rating(handles)
     [filename,pathname] = uiputfile({'*.xls; *.xlsx','Excel Spreadsheets (*.xls, *.xlsx)';'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname); %Prompt user for save path
     if ~isequal(filename,0) && ~isequal(pathname,0)
         rating = handles.rating; %Get ratings vector
-        output = [... %Add metadata to ratings vector
-            {sprintf('Filename: %s',get(handles.filename,'string'))};...
-            {sprintf('Axis Labels: %s to %s',get(handles.axis_lower,'string'),get(handles.axis_upper,'string'))};...
-            {sprintf('Axis Range: %d to %d',get(handles.slider,'min'),get(handles.slider,'max'))};...
-            {sprintf('Number of Axis Steps: %s',get(handles.axis_steps,'string'))};...
-            num2cell(rating)];
+        Settings = importdata('settings.mat');
+        % Add metadata to ratings vector
+        output = [...
+            {'Filename:',get(handles.filename,'string')};...
+            {'Axis Labels:',sprintf('"%s" to "%s"',get(handles.axis_lower,'string'),get(handles.axis_upper,'string'))};...
+            {'Axis Range:',sprintf('%d to %d',get(handles.slider,'min'),get(handles.slider,'max'))};...
+            {'Number of Axis Steps:',Settings.axis_steps};...
+            {'Second','Rating'};...
+            num2cell(1:length(rating))',num2cell(rating)];
         [~,~,ext] = fileparts(filename);
         if strcmpi(ext,'.XLS') || strcmpi(ext,'.XLSX')
             [success,message] = xlswrite(fullfile(pathname,filename),output); %Write output to Excel spreadsheet
@@ -170,11 +172,13 @@ function program_reset(handles)
     set(handles.settings,'enable','on'); %Enable Settings menu option
     set(handles.about,'enable','on'); %Enable About menu option
     set(handles.slider,'Enable','Inactive'); %Disable Slider
-    set(handles.slider,'Value',get(handles.slider,'Max')-(get(handles.slider,'Max')-get(handles.slider,'Min'))/2); %If axis image 2, set slider to midpoint value
+    set(handles.slider,'Value',get(handles.slider,'Max')-(get(handles.slider,'Max')-get(handles.slider,'Min'))/2); %Set slider to midpoint value
     drawnow; %Update GUI elements
 
 function make_changes(Settings,handles)
 %MAKE_CHANGES Applies configured settings
+    axis_min = str2double(Settings.axis_min);
+    axis_max = str2double(Settings.axis_max);
     axis_steps = str2double(Settings.axis_steps);
     set(handles.axis_lower,'String',Settings.axis_lower);
     set(handles.axis_upper,'String',Settings.axis_upper);
@@ -182,10 +186,15 @@ function make_changes(Settings,handles)
     axes(handles.axis_image); %Access slider image axis
     image([colorGradient(Settings.axis_color1,Settings.axis_color2,225,70);...
         colorGradient(Settings.axis_color2,Settings.axis_color3,225,70)]);
-    set(handles.slider,'Value',get(handles.slider,'Max')-(get(handles.slider,'Max')-get(handles.slider,'Min'))/2); %If axis image 2, set slider to midpoint value
+    set(handles.slider,'Min',axis_min,'Max',axis_max);
+    set(handles.slider,'Value',axis_max-(axis_max-axis_min)/2); %Set slider to midpoint value
     axis ij; hold on; %Configure axis image
     for i = 1:axis_steps-1
         plot([1,5],[450,450]*i/axis_steps,'k-'); %Plot left hash-marks on axis
         plot([65,70],[450,450]*i/axis_steps,'k-'); %Plot right hash-marks on axis
+    end
+    lin = linspace(axis_min,axis_max,axis_steps);
+    for i = 1:length(lin)
+        text(37.5,(((450*(i-1))/axis_steps)+((450*i)/axis_steps))/2,sprintf('%.2f',lin(i)),'HorizontalAlignment','center');
     end
     set(gca,'XTick',[],'YTick',[],'XLim',[0,70],'YLim',[0,450]); hold off; %Remove ticks and set limits on axis

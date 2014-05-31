@@ -35,6 +35,7 @@ else
     Settings = importdata('default.mat');
     save('settings.mat','Settings');
 end
+% Populate settings options with appropriate text/colors
 set(handles.axis_lower,'String',Settings.axis_lower);
 set(handles.axis_upper,'String',Settings.axis_upper);
 set(handles.axis_color1,'BackgroundColor',Settings.axis_color1);
@@ -51,7 +52,6 @@ varargout{1} = handles.output;
 
 function Settings = get_settings(handles)
 %GET_SETTINGS Creates Settings variable from current configuration
-
 % Get current configuration
 Settings.axis_lower = get(handles.axis_lower,'string');
 Settings.axis_upper = get(handles.axis_upper,'string');
@@ -102,7 +102,7 @@ save('default.mat','Settings');
 msgbox('Current settings saved as default.');
 
 function button_apply_Callback(hObject, eventdata, handles)
-%BUTTON_APPLY_CALLBACK Applies current configuration to carma window
+%BUTTON_APPLY_CALLBACK Saves current configuration as settings and closes
 Settings = get_settings(handles);
 save('settings.mat','Settings');
 close;
