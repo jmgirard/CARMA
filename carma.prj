@@ -1,9 +1,9 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="2700001791" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="CARMA" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+  <configuration build-checksum="1213344498" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>2.00</param.version>
+    <param.version>4.00</param.version>
     <param.authnamewatermark>Jeffrey M Girard</param.authnamewatermark>
     <param.email>jmg174@pitt.edu</param.email>
     <param.company>University of Pittsburgh</param.company>
@@ -64,10 +64,15 @@
     </fileset.main>
     <fileset.resources>
       <file>${PROJECT_ROOT}\carma.fig</file>
-      <file>${PROJECT_ROOT}\gradient1_450.png</file>
-      <file>${PROJECT_ROOT}\gradient2_450.png</file>
+      <file>${PROJECT_ROOT}\cell2csv.m</file>
+      <file>${PROJECT_ROOT}\colorGradient.m</file>
+      <file>${PROJECT_ROOT}\settings.fig</file>
+      <file>${PROJECT_ROOT}\settings.m</file>
     </fileset.resources>
-    <fileset.package />
+    <fileset.package>
+      <file>${PROJECT_ROOT}\default.mat</file>
+      <file>${PROJECT_ROOT}\settings.mat</file>
+    </fileset.package>
     <build-deliverables>
       <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\CARMA.exe</file>
       <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\readme.txt</file>
