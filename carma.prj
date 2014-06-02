@@ -1,9 +1,9 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="1213344498" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+  <configuration build-checksum="1326741201" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>4.00</param.version>
+    <param.version>5.00</param.version>
     <param.authnamewatermark>Jeffrey M Girard</param.authnamewatermark>
     <param.email>jmg174@pitt.edu</param.email>
     <param.company>University of Pittsburgh</param.company>
@@ -63,6 +63,8 @@
       <file>${PROJECT_ROOT}\carma.m</file>
     </fileset.main>
     <fileset.resources>
+      <file>${PROJECT_ROOT}\annotations.fig</file>
+      <file>${PROJECT_ROOT}\annotations.m</file>
       <file>${PROJECT_ROOT}\carma.fig</file>
       <file>${PROJECT_ROOT}\cell2csv.m</file>
       <file>${PROJECT_ROOT}\colorGradient.m</file>
