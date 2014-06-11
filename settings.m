@@ -31,11 +31,11 @@ function settings_OpeningFcn(hObject, eventdata, handles, varargin)
     mainGuiInput = find(strcmp(varargin,'carma'));
     handles.carma = varargin{mainGuiInput+1};
     % Load current settings or, if missing, default settings
-    if exist('settings.mat','file')~=0
-        Settings = importdata('settings.mat');
+    if exist(fullfile(ctfroot,'settings.mat'),'file')~=0
+        Settings = importdata(fullfile(ctfroot,'settings.mat'));
     else
-        Settings = importdata('default.mat');
-        save('settings.mat','Settings');
+        Settings = importdata(fullfile(ctfroot,'default.mat'));
+        save(fullfile(ctfroot,'settings.mat'),'Settings');
     end
     % Populate settings options with appropriate text/colors
     set(handles.text_axis_lower,'String',Settings.axis_lower);
@@ -99,7 +99,7 @@ function button_axis_color3_Callback(hObject, eventdata, handles)
 % --- Executes on button press in button_load_defaults.
 function button_load_defaults_Callback(hObject, eventdata, handles)
     % Load Default Settings
-    Settings = importdata('default.mat');
+    Settings = importdata(fullfile(ctfroot,'default.mat'));
     % Populate settings options with appropriate text/colors
     set(handles.text_axis_lower,'String',Settings.axis_lower);
     set(handles.text_axis_upper,'String',Settings.axis_upper);
@@ -115,12 +115,12 @@ function button_load_defaults_Callback(hObject, eventdata, handles)
 function button_save_default_Callback(hObject, eventdata, handles)
     % Save the current configuration as default settings
     Settings = get_settings(handles);
-    save('default.mat','Settings');
+    save(fullfile(ctfroot,'default.mat'),'Settings');
     msgbox('Current settings saved as default.');
 
 % --- Executes on button press in button_apply_changes.
 function button_apply_changes_Callback(hObject, eventdata, handles)
     % Save the current configuration as current and close Settings window
     Settings = get_settings(handles);
-    save('settings.mat','Settings');
+    save(fullfile(ctfroot,'settings.mat'),'Settings');
     close;

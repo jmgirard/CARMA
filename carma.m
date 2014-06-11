@@ -31,10 +31,10 @@ function carma_OpeningFcn(hObject, ~, handles, varargin)
     axctl = actxcontrollist;
     index = strcmp(axctl(:,1),'Windows Media Player');
     if sum(index)==0, errordlg('Please install Windows Media Player'); quit force; end
-    % Load default menu_settings or create them if default file is missing
-    if exist('default.mat','file')~=0
-        Settings = importdata('default.mat');
-        save('settings.mat','Settings');
+    % Load default settings or create them if default file is missing
+    if exist(fullfile(ctfroot,'default.mat'),'file')~=0
+        Settings = importdata(fullfile(ctfroot,'default.mat'));
+        save(fullfile(ctfroot,'settings.mat'),'Settings');
     else
         Settings.axis_lower = 'very negative';
         Settings.axis_upper = 'very positive';
@@ -44,8 +44,8 @@ function carma_OpeningFcn(hObject, ~, handles, varargin)
         Settings.axis_min = '-100';
         Settings.axis_max = '100';
         Settings.axis_steps = '9';
-        save('default.mat','Settings');
-        save('settings.mat','Settings');
+        save(fullfile(ctfroot,'default.mat'),'Settings');
+        save(fullfile(ctfroot,'settings.mat'),'Settings');
     end
     make_changes(Settings,handles);
     % Invoke and configure WMP ActiveX Controller
@@ -112,7 +112,7 @@ function toggle_playpause_Callback(hObject, ~, handles)
                 mean_ratings(i,:) = [i,mean(rating(index,2))];
             end
             % Open the collected annotations for viewing and exporting
-            Settings = importdata('settings.mat'); 
+            Settings = importdata(fullfile(ctfroot,'settings.mat')); 
             h = annotations('URL',handles.wmp.URL,'Settings',Settings,'Ratings',mean_ratings,'Duration',handles.dur);
             waitfor(h);
             program_reset(handles);
@@ -204,7 +204,7 @@ function menu_settings_Callback(hObject, ~, handles)
     H = settings('carma',handles.figure_carma);
     waitfor(H);
     % Load and apply the configured menu_settings
-    Settings = importdata('settings.mat');
+    Settings = importdata(fullfile(ctfroot,'settings.mat'));
     make_changes(Settings,handles);
     guidata(hObject, handles);
 
@@ -212,7 +212,7 @@ function menu_settings_Callback(hObject, ~, handles)
 function menu_about_Callback(hObject, ~, handles)
     % Display information menu_about CARMA
     line1 = 'Continuous Affect Rating and Media Annotation';
-    line2 = 'Version 5.00 <06-01-2014>';
+    line2 = 'Version 5.01 <06-11-2014>';
     line3 = 'Manual: http://carma.codeplex.com/documentation';
     line4 = 'Support: http://carma.codeplex.com/discussion';
     line5 = 'License: http://carma.codeplex.com/license';
