@@ -1,14 +1,14 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="1326741201" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+  <configuration build-checksum="2834737312" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>5.00</param.version>
+    <param.version>6.00</param.version>
     <param.authnamewatermark>Jeffrey M Girard</param.authnamewatermark>
     <param.email>jmg174@pitt.edu</param.email>
     <param.company>University of Pittsburgh</param.company>
     <param.summary>Continuous Affect Rating and Media Annotation</param.summary>
-    <param.description>Researchers in affective computing, human-computer interaction, and the social sciences have long been interested in perceived and experienced emotion. Measurement of these affective constructs is frequently accomplished by collecting holistic ratings at the end of a task, often using discrete emotion categories. However, both subjective experience and observable behavior unfold over time and across numerous affective dimensions. In order to capture all the shifting nuance of such unfolding, affective measurement must be continuous. CARMA is a media annotation program that collects continuous ratings while displaying audio and video files. It is designed to be highly user-friendly and easily customizable. It is written in MATLAB code and is available at http://carma.codeplex.com/.</param.description>
+    <param.description>CARMA is a media annotation program that collects continuous ratings while displaying audio and video files. It is designed to be highly user-friendly and easily customizable. Based on Gottman and Levenson’s affect rating dial, CARMA enables researchers and study participants to provide moment-by-moment ratings of multimedia files using a computer mouse or keyboard. The rating scale can be configured on a number of parameters including the labels for its upper and lower bounds, its numerical range, and its visual representation. Annotations can be displayed alongside the multimedia file and saved for easy import into statistical analysis software. CARMA provides a tool for researchers in affective computing, human-computer interaction, and the social sciences who need to capture the unfolding of subjective experience and observable behavior over time. http://www.carma.codeplex.com</param.description>
     <param.screenshot />
     <param.guid />
     <param.installpath.string>\CARMA</param.installpath.string>

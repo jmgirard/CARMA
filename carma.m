@@ -212,8 +212,30 @@ function menu_settings_Callback(hObject, ~, handles)
 function menu_about_Callback(hObject, ~, handles)
     % Display information menu_about CARMA
     line1 = 'Continuous Affect Rating and Media Annotation';
-    line2 = 'Version 5.01 <06-11-2014>';
+    line2 = 'Version 6.00 <06-25-2014>';
     line3 = 'Manual: http://carma.codeplex.com/documentation';
     line4 = 'Support: http://carma.codeplex.com/discussion';
     line5 = 'License: http://carma.codeplex.com/license';
     msgbox(sprintf('%s\n%s\n%s\n%s\n%s',line1,line2,line3,line4,line5),'About CARMA','help');
+
+% --- Executes when figure_carma is resized.
+function figure_carma_ResizeFcn(hObject, eventdata, handles)
+    % Get new figure size
+    pos = getpixelposition(handles.figure_carma);
+    w = pos(3); h = pos(4); sw = w-900; sh = h-550;
+    % Enforce minimum figure size
+    if w<900 || h<550
+        sw = 0; sh = 0;
+        setpixelposition(handles.figure_carma,[pos(1),pos(2),900,550]);
+        movegui(gcf,'center');
+    end
+    % Resize GUI elements
+    setpixelposition(handles.text_report,[10,10,175,40]);
+    setpixelposition(handles.text_filename,[195,10,350+sw,40]);
+    setpixelposition(handles.text_duration,[555+sw,10,175,40]);
+    setpixelposition(handles.toggle_playpause,[740+sw,10,70,40]);
+    if isfield(handles,'wmp'), handles.wmp.move([10,60,720+sw,480+sh]); end
+    setpixelposition(handles.axis_upper,[740+sw,525+sh,70,15]);
+    setpixelposition(handles.axis_lower,[740+sw,59,70,15]);
+    setpixelposition(handles.axis_image,[740+sw,75,70,450+sh]);
+    setpixelposition(handles.slider,[820+sw,59,70,481+sh]);
