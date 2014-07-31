@@ -1,9 +1,9 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="2834737312" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
-    <param.appname>CARMA</param.appname>
+  <configuration build-checksum="766523241" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+    <param.appname>carma</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>6.00</param.version>
+    <param.version>6.01</param.version>
     <param.authnamewatermark>Jeffrey M Girard</param.authnamewatermark>
     <param.email>jmg174@pitt.edu</param.email>
     <param.company>University of Pittsburgh</param.company>
@@ -15,12 +15,12 @@
     <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
     <param.logo />
     <param.install.notes />
-    <param.intermediate>${PROJECT_ROOT}\CARMA\for_testing</param.intermediate>
-    <param.output>${PROJECT_ROOT}\CARMA\for_redistribution</param.output>
+    <param.intermediate>${PROJECT_ROOT}\carma\for_testing</param.intermediate>
+    <param.output>${PROJECT_ROOT}\carma\for_redistribution</param.output>
     <param.user.defined.mcr.options />
     <param.embed.ctf>true</param.embed.ctf>
-    <param.server.ctf>${PROJECT_ROOT}\CARMA\for_testing\.ctf</param.server.ctf>
-    <param.server.readme>${PROJECT_ROOT}\CARMA\for_testing\readme.txt</param.server.readme>
+    <param.server.ctf>${PROJECT_ROOT}\carma\for_testing\.ctf</param.server.ctf>
+    <param.server.readme>${PROJECT_ROOT}\carma\for_testing\readme.txt</param.server.readme>
     <param.target.type>subtarget.standalone</param.target.type>
     <param.support.packages />
     <param.web.mcr>true</param.web.mcr>
@@ -76,9 +76,9 @@
       <file>${PROJECT_ROOT}\settings.mat</file>
     </fileset.package>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\CARMA.exe</file>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="splash.png" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\carma\for_testing" name="carma.exe" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma\for_testing\carma.exe</file>
+      <file location="${PROJECT_ROOT}\carma\for_testing" name="readme.txt" optional="true">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\carma\for_testing" name="splash.png" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma\for_testing\splash.png</file>
     </build-deliverables>
     <workflow />
     <matlab>
