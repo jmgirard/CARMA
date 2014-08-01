@@ -95,7 +95,8 @@ function button_export_Callback(hObject, eventdata, handles)
     axis_max = str2double(handles.Settings.axis_max);
     axis_steps = str2double(handles.Settings.axis_steps);
     [~,defaultname,~] = fileparts(handles.URL);
-    [filename,pathname] = uiputfile({'*.xls; *.xlsx','Excel Spreadsheets (*.xls, *.xlsx)';...
+    [filename,pathname] = uiputfile({'*.xlsx','Excel 2007 Spreadsheet (*.xlsx)';...
+        '*.xls','Excel 2003 Spreadsheet (*.xls)';...
         '*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
     if ~isequal(filename,0) && ~isequal(pathname,0)
         % Add metadata to mean ratings and timestamps

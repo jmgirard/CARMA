@@ -106,8 +106,8 @@ function toggle_playpause_Callback(hObject, ~, handles)
             set(handles.text_report,'string','Processing...');
             % Average ratings per second of playback
             rating = handles.rating;
-            mean_ratings = zeros(ceil(handles.dur),2);
-            for i = 1:ceil(handles.dur)
+            mean_ratings = zeros(floor(handles.dur),2);
+            for i = 1:floor(handles.dur)
                 index = rating(:,1)>=i-1 & rating(:,1)<i;
                 mean_ratings(i,:) = [i,mean(rating(index,2))];
             end
@@ -212,7 +212,7 @@ function menu_settings_Callback(hObject, ~, handles)
 function menu_about_Callback(hObject, ~, handles)
     % Display information menu_about CARMA
     line1 = 'Continuous Affect Rating and Media Annotation';
-    line2 = 'Version 6.01 <07-31-2014>';
+    line2 = 'Version 6.02 <08-01-2014>';
     line3 = 'Manual: http://carma.codeplex.com/documentation';
     line4 = 'Support: http://carma.codeplex.com/discussion';
     line5 = 'License: http://carma.codeplex.com/license';
