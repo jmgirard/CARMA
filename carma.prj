@@ -1,17 +1,17 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="3054600109" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+  <configuration build-checksum="3530619734" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>6.02</param.version>
+    <param.version>7.00</param.version>
     <param.authnamewatermark>Jeffrey M Girard</param.authnamewatermark>
     <param.email>jmg174@pitt.edu</param.email>
     <param.company>University of Pittsburgh</param.company>
-    <param.summary>Continuous Affect Rating and Media Annotation</param.summary>
+    <param.summary />
     <param.description>CARMA is a media annotation program that collects continuous ratings while displaying audio and video files. It is designed to be highly user-friendly and easily customizable. Based on Gottman and Levenson’s affect rating dial, CARMA enables researchers and study participants to provide moment-by-moment ratings of multimedia files using a computer mouse or keyboard. The rating scale can be configured on a number of parameters including the labels for its upper and lower bounds, its numerical range, and its visual representation. Annotations can be displayed alongside the multimedia file and saved for easy import into statistical analysis software. CARMA provides a tool for researchers in affective computing, human-computer interaction, and the social sciences who need to capture the unfolding of subjective experience and observable behavior over time. http://www.carma.codeplex.com</param.description>
     <param.screenshot />
     <param.guid />
-    <param.installpath.string>\CARMA</param.installpath.string>
+    <param.installpath.string>\CARMA\</param.installpath.string>
     <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
     <param.logo />
     <param.install.notes />
@@ -38,6 +38,7 @@
       <param.authnamewatermark />
       <param.email />
       <param.company />
+      <param.summary />
       <param.screenshot />
       <param.guid />
       <param.installpath.combo />
@@ -45,6 +46,7 @@
       <param.install.notes />
       <param.intermediate />
       <param.output />
+      <param.user.defined.mcr.options />
       <param.embed.ctf />
       <param.server.ctf />
       <param.server.readme />
@@ -60,21 +62,21 @@
       <param.log.file />
     </unset>
     <fileset.main>
-      <file>${PROJECT_ROOT}\carma.m</file>
+      <file>${PROJECT_ROOT}\main.m</file>
     </fileset.main>
     <fileset.resources>
-      <file>${PROJECT_ROOT}\annotations.fig</file>
       <file>${PROJECT_ROOT}\annotations.m</file>
-      <file>${PROJECT_ROOT}\carma.fig</file>
+      <file>${PROJECT_ROOT}\calcICC.m</file>
       <file>${PROJECT_ROOT}\cell2csv.m</file>
       <file>${PROJECT_ROOT}\colorGradient.m</file>
-      <file>${PROJECT_ROOT}\settings.fig</file>
+      <file>${PROJECT_ROOT}\cronbach.m</file>
+      <file>${PROJECT_ROOT}\maximize.m</file>
+      <file>${PROJECT_ROOT}\rgbconv.m</file>
       <file>${PROJECT_ROOT}\settings.m</file>
+      <file>${PROJECT_ROOT}\varycolor.m</file>
+      <file>${PROJECT_ROOT}\windowMaximize.dll</file>
     </fileset.resources>
-    <fileset.package>
-      <file>${PROJECT_ROOT}\default.mat</file>
-      <file>${PROJECT_ROOT}\settings.mat</file>
-    </fileset.package>
+    <fileset.package />
     <build-deliverables>
       <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\CARMA.exe</file>
       <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_testing\readme.txt</file>
