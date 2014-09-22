@@ -31,6 +31,7 @@ function status = annotations(varargin)
         'Position',[lc .04 .87 .08]);
     handles.listbox = uicontrol('Style','listbox',...
         'Units','normalized',...
+        'FontSize',12,...
         'Position',[rc .185 .10 .795]);
     handles.button_addseries = uicontrol('Style','pushbutton',...
         'Units','normalized',...
@@ -59,7 +60,7 @@ function status = annotations(varargin)
         'Units','Normalized',...
         'Position',[rc .02 .10 .10],...
         'String','Play',...
-        'FontSize',12.0,...
+        'FontSize',16.0,...
         'Callback',{@toggle_playpause_Callback,handles});
     % Check for and find Window Media Player (WMP) ActiveX Controller
     axctl = actxcontrollist;
@@ -177,8 +178,11 @@ function menu_reliability_Callback(~,~,handles)
     Data = handles.AllRatings;
     [ICC31,ICC3k,alpha] = reliability(Data);
     % Create figure to display results
-    f = figure('Position',[0 0 300 100]);
-    set(f,'MenuBar','none','Name','Reliability Report','NumberTitle','off');
+    f = figure('Position',[0 0 300 100],...
+        'MenuBar','none',...
+        'Name','Reliability Report',...
+        'NumberTitle','off',...
+        'Resize','off');
     labels = {'Number of Raters';'Single ICC (3,1)';'Average ICC (3,k)';'Cronbach Alpha'};
     numbers = {size(Data,2);ICC31;ICC3k;alpha};
     uitable('Parent',f,...
@@ -339,6 +343,8 @@ function toggle_playpause_Callback(hObject,~,handles)
         while ~strcmp(handles.wmp2.playState,'wmppsPlaying'), pause(0.01); end
         % Update GUI elements
         set(hObject,'String','Pause');
+        set(handles.menu_export,'Enable','off');
+        set(handles.menu_reliability,'Enable','off');
         axes(handles.axis_annotations);
         % While playing, plot current ratings in axis_annotations
         set(gca,'NextPlot','add');
@@ -353,11 +359,15 @@ function toggle_playpause_Callback(hObject,~,handles)
             % When done, send stop() command to WMP
             handles.wmp2.controls.stop();
             set(hObject,'String','Play');
+            set(handles.menu_export,'Enable','on');
+            set(handles.menu_reliability,'Enable','on');
         end
     else
         % If toggle is set to pause, send pause() command to WMP
         handles.wmp2.controls.pause();
         set(hObject,'String','Play');
+        set(handles.menu_export,'Enable','on');
+        set(handles.menu_reliability,'Enable','on');
     end
     guidata(hObject, handles);
 end

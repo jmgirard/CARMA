@@ -1,4 +1,4 @@
-function [ICC31,ICC3k,alpha] = reliability( dat )
+function [ICC31,ICC3k,calpha] = reliability( dat )
 %RELIABILITY Code to compute the intraclass correlations and cronbach's alpha
 % License: https://carma.codeplex.com/license
 
@@ -14,11 +14,11 @@ function [ICC31,ICC3k,alpha] = reliability( dat )
 	ESS = WSS - RSS; %residual sum of squares
 	EMS = ESS / ((k - 1) * (n - 1)); %residual mean sqrs
 
-	ICC31 = (BMS - EMS) / (BMS + (k - 1) * EMS);
-	ICC3k = (BMS - EMS) / BMS;
+	ICC31 = (BMS - EMS) / (BMS + (k - 1) * EMS); %single icc equation 3,1
+	ICC3k = (BMS - EMS) / BMS; %average icc equation 3,k
 
 	VarTotal = var(sum(dat')); %variance of the items' sum
 	SumVarX = sum(var(dat)); %sum of the item variance
 
-	alpha = k/(k-1)*(VarTotal-SumVarX)/VarTotal;
+	calpha = k/(k-1)*(VarTotal-SumVarX)/VarTotal; %cronbach's alpha
 end
