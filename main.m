@@ -9,7 +9,8 @@ function main
         'NumberTitle','off',...
         'MenuBar','none',...
         'Resize','off',...
-        'Color',defaultBackground);
+        'Color',defaultBackground,...
+        'KeyPressFcn',@figure_main_KeyPress);
     maximize(handles.figure_main);
     pause(0.1);
     % Create menu bar elements
@@ -62,7 +63,8 @@ function main
         'Parent',handles.figure_main,...
         'Units','Normalized',...
         'Position',[.94 .09 .05 .89],...
-        'BackgroundColor',[.5 .5 .5]);
+        'BackgroundColor',[.5 .5 .5],...
+        'KeyPressFcn',@figure_main_KeyPress);
     handles.axis_image = axes('Units','Normalized',...
         'Parent',handles.figure_main,...
         'Position',[.88 .109 .05 .855],...
@@ -109,6 +111,21 @@ function main
     % Save handles to guidata
     guidata(handles.figure_main,handles);
     make_changes(Settings,handles);
+end
+
+% --- Executes when a key is pressed.
+function figure_main_KeyPress(hObject,eventdata)
+    handles = guidata(hObject);
+    % Escape if the playpause button is disabled
+    if strcmp(get(handles.toggle_playpause,'enable'),'inactive'), return; end
+    % Pause playback if the pressed key is spacebar
+    if strcmp(eventdata.Key,'space') && get(handles.toggle_playpause,'value')
+        handles.wmp.controls.pause();
+        set(handles.toggle_playpause,'String','Resume','Value',0);
+    else
+        return;
+    end
+    guidata(hObject,handles);
 end
 
 % --- Executes when menu_multimedia is clicked.
@@ -176,7 +193,7 @@ end
 function menu_about_Callback(~,~)
     % Display information menu_about CARMA
     line1 = 'Continuous Affect Rating and Media Annotation';
-    line2 = 'Version 7.00 <09-21-2014>';
+    line2 = 'Version 7.01 <09-23-2014>';
     line3 = 'Manual: http://carma.codeplex.com/documentation';
     line4 = 'Support: http://carma.codeplex.com/discussion';
     line5 = 'License: http://carma.codeplex.com/license';
@@ -276,7 +293,7 @@ function toggle_playpause_Callback(hObject,~,handles)
     else
         % If toggle button is set to pause, send pause() command to WMP
         handles.wmp.controls.pause();
-        set(hObject,'string','Resume');
+        set(hObject,'String','Resume','Value',0);
     end
 end
 
