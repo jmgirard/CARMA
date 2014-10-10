@@ -1,24 +1,32 @@
-function [ICC31,ICC3k,calpha] = reliability( dat )
-%RELIABILITY Code to compute the intraclass correlations and cronbach's alpha
+function [box] = reliability( X )
+%RELIABILITY Code to populate the reliability box based on number of raters
 % License: https://carma.codeplex.com/license
 
-	k = size(dat,2); %number of raters
-	n = size(dat,1); %number of targets
-	mpt = mean(dat,2); %mean per target
-    mpr = mean(dat); %mean per rater/rating
-	tm = mean(mpt); %get total mean
-	BSS = sum((mpt - tm).^2) * k; %between target sum sqrs
-	BMS = BSS / (n - 1); %between targets mean squares
-    WSS = sum(sum(bsxfun(@minus,dat,mpt).^2)); %within target sum sqrs
-    RSS = sum((mpr - tm).^2) * n; %between rater sum sqrs
-	ESS = WSS - RSS; %residual sum of squares
-	EMS = ESS / ((k - 1) * (n - 1)); %residual mean sqrs
-
-	ICC31 = (BMS - EMS) / (BMS + (k - 1) * EMS); %single icc equation 3,1
-	ICC3k = (BMS - EMS) / BMS; %average icc equation 3,k
-
-	VarTotal = var(sum(dat')); %variance of the items' sum
-	SumVarX = sum(var(dat)); %sum of the item variance
-
-	calpha = k/(k-1)*(VarTotal-SumVarX)/VarTotal; %cronbach's alpha
+	k = size(X,2);
+    PCC = corr(X,'type','Pearson');
+	cAlpha = k/(k-1)*(var(sum(X'))-sum(var(X)))/var(sum(X'));
+    
+    if k == 1
+        box = {'# Raters','1';...
+            '[01] Mean',num2str(mean(X),'%.0f');...
+            '[01] SD',num2str(std(X),'%.0f')};
+    elseif k == 2
+        box = {'# Raters','2';...
+            'Correlation',num2str(PCC(1,2),'%.3f');...
+            'Cronbach A',num2str(cAlpha,'%.3f');...
+            '[01] Mean',num2str(mean(X(:,1)),'%.0f');...
+            '[02] Mean',num2str(mean(X(:,2)),'%.0f');...
+            '[01] SD',num2str(std(X(:,1)),'%.0f');...
+            '[02] SD',num2str(std(X(:,2)),'%.0f')};
+    elseif k > 2
+        box = {'# Raters',num2str(k,'%d')};
+        box = [box;{'Cronbach A',num2str(cAlpha,'%.3f')}];
+        for i = 1:k
+            box = [box;{sprintf('[%02d] Mean',i),num2str(mean(X(:,i)),'%.0f');}];
+        end
+        for i = 1:k
+            box = [box;{sprintf('[%02d] SD',i),num2str(std(X(:,i)),'%.0f');}];
+        end
+    end
+    
 end
