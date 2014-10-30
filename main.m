@@ -5,12 +5,15 @@ function main
     % Create and center main window
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_main = figure( ...
-        'Position',[0 0 0 0], ...
+        'Units','normalized', ...
+        'Position',[.1 .1 .8 .8], ...
         'Name','Continuous Affect Rating and Media Annotation', ...
         'NumberTitle','off', ...
 		'ToolBar','none', ...
         'MenuBar','none', ...
+        'Visible','off', ...
         'Color',defaultBackground, ...
+        'SizeChangedFcn',@figure_main_SizeChanged, ...
         'KeyPressFcn',@figure_main_KeyPress);
     % Create menu bar elements
     handles.menu_multimedia = uimenu(handles.figure_main, ...
@@ -30,13 +33,7 @@ function main
         'Parent',handles.figure_main, ...
         'Label','About CARMA', ...
         'Callback',@menu_about_Callback);
-	% Maximize and lock window
-    pause(.5);
-    warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
-    frame_h = get(handle(gcf),'JavaFrame');
-    set(frame_h,'Maximized',1);
-    pause(.01);
-    set(handles.figure_main,'Resize','off');
+    pause(0.1);
     % Create uicontrol elements
     handles.text_report = uicontrol('Style','edit', ...
         'Parent',handles.figure_main, ...
@@ -87,6 +84,10 @@ function main
         'Parent',handles.figure_main, ...
         'Position',[.88 .109 .05 .853], ...
         'Box','on','XTick',[],'YTick',[],'Layer','top');
+    handles.axis_guide = axes('Units','Normalized', ...
+        'Parent',handles.figure_main, ...
+        'Position',[.01 .09 .86 .89], ...
+        'Box','on','XTick',[],'YTick',[],'Color','black');
     % Check for and find Window Media Player (WMP) ActiveX Controller
     axctl = actxcontrollist;
     index = strcmp(axctl(:,1),'Windows Media Player');
@@ -108,19 +109,19 @@ function main
         save(fullfile(ctfroot,'default.mat'),'Settings');
         save(fullfile(ctfroot,'settings.mat'),'Settings');
     end
+    handles.sps = Settings.sps;
     % Invoke and configure WMP ActiveX Controller
-    fp = getpixelposition(handles.figure_main);
-    pause(.25);
-    handles.wmp = actxcontrol(axctl{index,2},fp([3 4 3 4]).*[.01 .09 .865 .905],handles.figure_main);
+    handles.wmp = actxcontrol(axctl{index,2},getpixelposition(handles.axis_guide),handles.figure_main);
     handles.wmp.stretchToFit = true;
     handles.wmp.uiMode = 'none';
     set(handles.wmp.settings,'autoStart',0);
-	% Create timer
+	% Create timer that executes 12 times per second
 	handles.timer = timer( ...
         'ExecutionMode','fixedRate', ...
-        'Period',0.05, ...
+        'Period',0.083, ...
         'TimerFcn',{@timer_Callback,handles});
     % Save handles to guidata
+    handles.figure_main.Visible = 'on';
     guidata(handles.figure_main,handles);
     make_changes(Settings,handles);
 end
@@ -139,6 +140,24 @@ function figure_main_KeyPress(hObject,eventdata)
         return;
     end
     guidata(hObject,handles);
+end
+
+% ===============================================================================
+
+function figure_main_SizeChanged(hObject,~)
+    handles = guidata(hObject);
+    if isfield(handles,'figure_main')
+        pos = getpixelposition(handles.figure_main);
+        % Force to remain above a minimum size
+        if pos(3) < 1024 || pos(4) < 600
+            setpixelposition(handles.figure_main,[pos(1) pos(2) 1024 600]);
+            movegui(handles.figure_main,'center');
+        end
+        % Update the size and position of the WMP controller
+        if isfield(handles,'wmp')
+            move(handles.wmp,getpixelposition(handles.axis_guide));
+        end
+    end
 end
 
 % ===============================================================================
@@ -186,7 +205,7 @@ function timer_Callback(~,~,handles)
 		handles.wmp.controls.stop();
 		stop(handles.timer);
 		set(handles.text_report,'string','Processing...');
-		% Average ratings per second of playback
+		% Average ratings per bin of playback
 		rating = handles.rating;
         mean_ratings = [];
         sps = str2double(handles.sps);
@@ -207,7 +226,7 @@ function timer_Callback(~,~,handles)
 		[filename,pathname] = uiputfile({'*.xlsx','Excel 2007 Spreadsheet (*.xlsx)';...
 			'*.xls','Excel 2003 Spreadsheet (*.xls)';...
 			'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
-		if ~isequal(filename,0) && ~isequal(pathname,0)
+        if ~isequal(filename,0) && ~isequal(pathname,0)
 			% Add metadata to mean ratings and timestamps
 			output = [ ...
                 {'Time of Rating'},{datestr(now)}; ...
@@ -245,10 +264,19 @@ function timer_Callback(~,~,handles)
 			end
 		else
 			filename = 'Unsaved';
-		end
-		% Open the collected annotations for viewing and exporting
-		annotations('URL',handles.wmp.URL,'Settings',Settings,'Ratings',mean_ratings,'Duration',handles.dur,'Filename',filename);
-		program_reset(handles);
+        end
+        set(handles.toggle_playpause,'Value',0);
+        program_reset(handles);
+        % Ask user to open annotation viewer
+        choice = questdlg('Open ratings in annotations viewer?', ...
+            'CARMA','Yes','No','Yes');
+        switch choice
+            case 'Yes'
+                pause(0.25);
+                annotations('URL',handles.wmp.URL,'Settings',Settings,'Ratings',mean_ratings,'Duration',handles.dur,'Filename',filename);
+            case 'No'
+                return;
+        end
 	% While transitioning
 	else
 		return;
@@ -381,7 +409,7 @@ end
 function menu_about_Callback(~,~)
     % Display information menu_about CARMA
     line1 = 'Continuous Affect Rating and Media Annotation';
-    line2 = 'Version 8.00 <10-10-2014>';
+    line2 = 'Version 8.01 <10-30-2014>';
     line3 = 'Manual: http://carma.codeplex.com/documentation';
     line4 = 'Support: http://carma.codeplex.com/discussion';
     line5 = 'License: http://carma.codeplex.com/license';

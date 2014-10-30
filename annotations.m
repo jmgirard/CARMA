@@ -5,33 +5,40 @@ function status = annotations(varargin)
     % Create and maximize annotation window
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_annotations = figure( ...
-        'Position',[0 0 0 0], ...
+        'Units','normalized', ...
+        'Position',[.1 .1 .8 .8], ...
         'Name','CARMA: Annotation Viewer', ...
         'NumberTitle','off', ...
         'ToolBar','none', ...
         'MenuBar','none', ...
-        'Color',defaultBackground);
+        'Visible','off', ...
+        'Color',defaultBackground, ...
+        'SizeChangedFcn',@figure_annotations_SizeChanged);
     %Create menu bar elements
+    handles.menu_addseries = uimenu(handles.figure_annotations, ...
+        'Parent',handles.figure_annotations, ...
+        'Label','Add Annotation File', ...
+        'Callback',@button_addseries_Callback);
+    handles.menu_delseries = uimenu(handles.figure_annotations, ...
+        'Parent',handles.figure_annotations, ...
+        'Label','Remove Annotation File', ...
+        'Callback',@button_delseries_Callback);
     handles.menu_export = uimenu(handles.figure_annotations, ...
         'Parent',handles.figure_annotations, ...
         'Label','Export Mean Ratings', ...
         'Callback',@menu_export_Callback);
-    % Maximize and lock window
-    pause(.5);
-    frame_h = get(handle(gcf),'JavaFrame');
-    set(frame_h,'Maximized',1);
-    pause(.5);
-    set(handles.figure_annotations,'Resize','off');
+    pause(.1);
     %Create uicontrol elements
     lc = .01; rc = .89;
     handles.axis_annotations = axes('Units','Normalized', ...
         'Parent',handles.figure_annotations, ...
         'TickLength',[0.05 0], ...
         'OuterPosition',[0 0 1 1], ...
-        'Position',[lc .04 .87 .08]);
+        'Position',[lc .04 .87 .15], ...
+        'ButtonDownFcn',@axis_click_Callback);
     handles.listbox = uicontrol('Style','listbox', ...
         'Units','normalized', ...
-        'FontSize',12, ...
+        'FontSize',10, ...
         'Position',[rc .485 .10 .50]);
     handles.button_addseries = uicontrol('Style','pushbutton', ...
         'Units','normalized', ...
@@ -71,14 +78,16 @@ function status = annotations(varargin)
         'String','Play', ...
         'FontSize',16.0, ...
         'Callback',@toggle_playpause_Callback);
+    handles.axis_guide = axes('Units','Normalized', ...
+        'Parent',handles.figure_annotations, ...
+        'Position',[.01 .21 .87 .775], ...
+        'Box','on','XTick',[],'YTick',[],'Color','black');
     % Check for and find Window Media Player (WMP) ActiveX Controller
     axctl = actxcontrollist;
     index = strcmp(axctl(:,1),'Windows Media Player');
     if sum(index)==0, errordlg('Please install Windows Media Player'); quit force; end
     % Invoke and configure WMP ActiveX Controller
-    fp = getpixelposition(handles.figure_annotations);
-    pause(.25);
-    handles.wmp2 = actxcontrol(axctl{index,2},fp([3 4 3 4]).*[lc .14 .875 .856],handles.figure_annotations);
+    handles.wmp2 = actxcontrol(axctl{index,2},getpixelposition(handles.axis_guide),handles.figure_annotations);
     handles.wmp2.stretchToFit = true;
     handles.wmp2.uiMode = 'none';
     set(handles.wmp2.settings,'autoStart',0);
@@ -94,6 +103,12 @@ function status = annotations(varargin)
     [~,handles.filename,~] = fileparts(filename);
     handles.AllFilenames = {handles.filename};
     handles.wmp2.URL = handles.URL;
+    handles.wmp2.controls.play();
+    while ~strcmp(handles.wmp2.playState,'wmppsPlaying')
+        pause(0.001);
+    end
+    handles.wmp2.controls.pause();
+    handles.wmp2.controls.currentPosition = 0;
     % Populate list box
     set(handles.listbox,'String',{'<html><u>Annotation Files';sprintf('<html><font color="%s">[01]</font> %s',rgbconv([0 0.4470 0.7410]),handles.filename)});
     % Populate reliability box
@@ -102,7 +117,7 @@ function status = annotations(varargin)
     % Create timer
 	handles.timer2 = timer(...
         'ExecutionMode','fixedRate', ...
-        'Period',0.05, ...
+        'Period',0.083, ...
         'TimerFcn',{@timer2_Callback,handles});
     % Save handles to guidata
     guidata(handles.figure_annotations,handles);
@@ -172,10 +187,6 @@ function button_addseries_Callback(hObject,~)
     if filename==0, return; end
     [~,~,data] = xlsread(fullfile(pathname,filename));
     % Check that the import file matches the multimedia file
-    if floor(handles.dur) ~= data{end,1}
-        msgbox('Annotation file must be the same duration as multimedia file.','Error','Error');
-        return;
-    end
     if size(handles.AllRatings,1) ~= size(data,1)-9
         msgbox('Annotation file must have the same sampling rate as the other annotation files.','Error','Error');
         return;
@@ -273,8 +284,6 @@ function toggle_meanplot_Callback(hObject,~)
         rows = [cellstr(rows);'<html><font color="red">[M]</font> Mean Plot'];
         set(handles.listbox,'String',rows);
     else
-        % Plot old series with colors
-        axes(handles.axis_annotations);
         % Update list box
         set(handles.listbox,'Value',1);
         rows = {'<html><u>Annotation Files'};
@@ -283,7 +292,6 @@ function toggle_meanplot_Callback(hObject,~)
             rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',rgbconv(handles.CS(colorindex,:)),i,handles.AllFilenames{i})];
         end
         set(handles.listbox,'String',rows);
-        drawnow();
     end
     guidata(hObject,handles);
 end
@@ -345,7 +353,7 @@ function update_plots(handles)
         lower = str2double(handles.Settings.axis_max);
         ylim([upper,lower]);
         xlim([0,ceil(handles.dur)+1]);
-        set(gca,'YTick',lower+(upper-lower)/2,'YTickLabel',[],'YGrid','on');
+        set(gca,'YTick',lower+(upper-lower)/2,'YTickLabel',[],'YGrid','on','ButtonDownFcn',@axis_click_Callback);
         handles.CS = get(gca,'ColorOrder');
     elseif get(handles.toggle_meanplot,'Value')==get(handles.toggle_meanplot,'Max')
         % Plot each series of ratings in blue and the mean series in red
@@ -357,8 +365,58 @@ function update_plots(handles)
         lower = str2double(handles.Settings.axis_max);
         ylim([upper,lower]);
         xlim([0,ceil(handles.dur)+1]);
-        set(gca,'YTick',lower+(upper-lower)/2,'YTickLabel',[],'YGrid','on');
+        set(gca,'YTick',lower+(upper-lower)/2,'YTickLabel',[],'YGrid','on','ButtonDownFcn',@axis_click_Callback);
         hold off;
     end
     guidata(handles.figure_annotations,handles);
+end
+
+% ===============================================================================
+
+function figure_annotations_SizeChanged(hObject,~)
+    handles = guidata(hObject);
+    if isfield(handles,'figure_annotations')
+        pos = getpixelposition(handles.figure_annotations);
+        % Force to remain above a minimum size
+        if pos(3) < 1024 || pos(4) < 600
+            setpixelposition(handles.figure_annotations,[pos(1) pos(2) 1024 600]);
+            movegui(handles.figure_annotations,'center');
+        end
+        % Update the size and position of the WMP controller
+        if isfield(handles,'wmp2')
+            move(handles.wmp2,getpixelposition(handles.axis_guide));
+        end
+    end
+end
+
+% ===============================================================================
+
+function axis_click_Callback(hObject,~)
+    % Jump WMP playback to clicked position
+    handles = guidata(hObject);
+    coord = get(hObject,'CurrentPoint');
+    duration = handles.wmp2.currentMedia.duration;
+    if coord(1,1) > duration-1
+        handles.wmp2.controls.currentPosition = duration-1;
+    elseif coord(1,1) > 0
+        handles.wmp2.controls.currentPosition = coord(1,1);
+    else
+        handles.wmp2.controls.currentPosition = 0;
+    end
+    handles.wmp2.controls.step(1);
+    pause(.05);
+    % While playing, update annotations plot
+    ts = handles.wmp2.controls.currentPosition;
+    update_plots(handles);
+    hold on;
+    plot(handles.axis_annotations,[ts,ts],[100,-100],'k');
+    hold off;
+    drawnow();
+    %set to pause if it was playing
+    if get(handles.toggle_playpause,'Value')==get(handles.toggle_playpause,'Max')
+        stop(handles.timer2);
+        set(handles.toggle_playpause, ...
+            'Value',get(handles.toggle_playpause,'Min'), ...
+            'String','Resume');
+    end
 end

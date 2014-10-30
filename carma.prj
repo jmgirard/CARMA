@@ -1,9 +1,9 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="3010220582" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
+  <configuration build-checksum="844742038" file="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\carma.prj" location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA" name="carma" preferred-package-location="Z:\Jeff Girard\Software\Continuous_Measurement\CARMA\CARMA\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="MATLAB Compiler for Standalone Applications">
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>8.00</param.version>
+    <param.version>8.01</param.version>
     <param.authnamewatermark>Jeffrey M Girard</param.authnamewatermark>
     <param.email>jmg174@pitt.edu</param.email>
     <param.company>University of Pittsburgh</param.company>
