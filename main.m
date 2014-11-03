@@ -14,6 +14,7 @@ function main
         'Visible','off', ...
         'Color',defaultBackground, ...
         'SizeChangedFcn',@figure_main_SizeChanged, ...
+        'CloseRequestFcn',@figure_main_CloseReq, ...
         'KeyPressFcn',@figure_main_KeyPress);
     % Create menu bar elements
     handles.menu_multimedia = uimenu(handles.figure_main, ...
@@ -140,6 +141,26 @@ function figure_main_KeyPress(hObject,eventdata)
         return;
     end
     guidata(hObject,handles);
+end
+
+% ===============================================================================
+
+function figure_main_CloseReq(hObject,~)
+    handles = guidata(hObject);
+    % Pause playback and rating
+    handles.wmp.controls.pause();
+    if isvalid(handles.timer), stop(handles.timer); end
+    set(handles.toggle_playpause,'String','Resume','Value',0);
+    % Prompt user if they really want to close
+    choice = questdlg('Do you really want to close CARMA?', ...
+        'CARMA','Yes','No','No');
+    switch choice
+        case 'Yes'
+            if isvalid(timerfind), delete(timerfind); end
+            delete(gcf);
+        case 'No'
+            return;
+    end
 end
 
 % ===============================================================================

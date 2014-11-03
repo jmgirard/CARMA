@@ -13,6 +13,7 @@ function status = annotations(varargin)
         'MenuBar','none', ...
         'Visible','off', ...
         'Color',defaultBackground, ...
+        'CloseRequestFcn',@figure_annotations_CloseReq, ...
         'SizeChangedFcn',@figure_annotations_SizeChanged);
     %Create menu bar elements
     handles.menu_addseries = uimenu(handles.figure_annotations, ...
@@ -369,6 +370,14 @@ function update_plots(handles)
         hold off;
     end
     guidata(handles.figure_annotations,handles);
+end
+
+% ===============================================================================
+
+function figure_annotations_CloseReq(~,~)
+    % Remove timer as part of cleanup
+    if isvalid(timerfind), delete(timerfind); end
+    delete(gcf);
 end
 
 % ===============================================================================
