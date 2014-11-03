@@ -374,9 +374,10 @@ end
 
 % ===============================================================================
 
-function figure_annotations_CloseReq(~,~)
+function figure_annotations_CloseReq(hObject,~)
+    handles = guidata(hObject);
     % Remove timer as part of cleanup
-    if isvalid(timerfind), delete(timerfind); end
+    delete(handles.timer2);
     delete(gcf);
 end
 
