@@ -430,7 +430,7 @@ end
 function menu_about_Callback(~,~)
     % Display information menu_about CARMA
     line1 = 'Continuous Affect Rating and Media Annotation';
-    line2 = 'Version 8.01 <10-30-2014>';
+    line2 = 'Version 8.02 <11-03-2014>';
     line3 = 'Manual: http://carma.codeplex.com/documentation';
     line4 = 'Support: http://carma.codeplex.com/discussion';
     line5 = 'License: http://carma.codeplex.com/license';
