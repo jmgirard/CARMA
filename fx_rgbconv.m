@@ -1,4 +1,4 @@
-function [x,y,z]=rgbconv(a,b,c)
+function [x,y,z] = fx_rgbconv(a,b,c)
 %RGBCONV   Convert hex color to or from matlab rgb vector.
 %   RGB = RGBCONV(HEX)  where HEX is a string of hexadecimal numbers
 %      'RRGGBB' where the parts RR, GG, BB are two digit hexadecimal
@@ -39,24 +39,24 @@ switch(nargin)
 case 1
    if iscell(a)
       arg=[a{1} a{2} a{3}];
-   elseif ischar(a) & all(size(a)==[3 2])
+   elseif ischar(a) && all(size(a)==[3 2])
       arg=[a(1,:) a(2,:) a(3,:)];
-   elseif ischar(a) & all(size(a)==[6 1])
+   elseif ischar(a) && all(size(a)==[6 1])
       arg=a';
-   elseif ischar(a) & all(size(a)==[1 6])
+   elseif ischar(a) && all(size(a)==[1 6])
       arg=a;
-   elseif isnumeric(a) & all(size(a)==[1 3]) | all(size(a)==[3 1])
+   elseif isnumeric(a) && all(size(a)==[1 3]) || all(size(a)==[3 1])
       arg=a;
       flag=1;
    else
       error('Syntax error.')
    end
 case 3
-   if ischar(a) & ischar(b) & ischar(c) & ...
-         length(a)==2 & length(b)==2 & length(c)==2
+   if ischar(a) && ischar(b) && ischar(c) && ...
+         length(a)==2 && length(b)==2 && length(c)==2
       arg=[a(:)' b(:)' c(:)'];
-   elseif isnumeric(a) & isnumeric(b) & isnumeric(c) & ...
-         length(a)==1 & length(b)==1 & length(c)==1
+   elseif isnumeric(a) && isnumeric(b) && isnumeric(c) && ...
+         length(a)==1 && length(b)==1 && length(c)==1
       arg=[a b c];
       flag=1;
    end
