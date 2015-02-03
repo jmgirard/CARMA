@@ -115,6 +115,9 @@ function fig_collect
         'Period',0.05, ...
         'TimerFcn',{@timer_Callback,handles}, ...
         'ErrorFcn',{@timer_ErrorFcn,handles});
+    % Start system clock to improve VLC time stamp precision
+        global global_tic;
+        global_tic = tic;
     % Save handles to guidata
     handles.figure_collect.Visible = 'on';
     guidata(handles.figure_collect,handles);
@@ -132,7 +135,7 @@ function menu_multimedia_Callback(hObject,~)
     global last_ts_sys;
     ratings = [];
     last_ts_vlc = 0;
-    last_ts_sys = zeros(1,6);
+    last_ts_sys = 0;
     % Browse for, load, and get text_duration for a multimedia file
     [video_name,video_path] = uigetfile({'*.*','All Files (*.*)'},'Select an audio or video file');
     if video_name==0, return; end
@@ -212,19 +215,19 @@ function timer_Callback(~,~,handles)
     global ratings;
     global last_ts_vlc;
     global last_ts_sys;
+    global global_tic;
     % While playing
     if handles.vlc.input.state == 3
-        ts_vlc = handles.vlc.input.time;
-        ts_sys = clock;
+        ts_vlc = handles.vlc.input.time/1000;
+        ts_sys = toc(global_tic);
         if ts_vlc == last_ts_vlc && last_ts_vlc ~= 0
-            ts_diff = ts_sys(6) - last_ts_sys(6);
-            if ts_diff < 0, ts_diff = 60+ts_diff; end
-            ts_vlc = ts_vlc + ts_diff*1000;
+            ts_diff = ts_sys - last_ts_sys;
+            ts_vlc = ts_vlc + ts_diff;
         else
             last_ts_vlc = ts_vlc;
             last_ts_sys = ts_sys;
         end
-        ratings = [ratings; ts_vlc/1000,get(handles.slider,'value')];
+        ratings = [ratings; ts_vlc,get(handles.slider,'value')];
         set(handles.text_report,'string',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
         drawnow();
     % After playing
