@@ -112,7 +112,7 @@ function fig_collect
     % Create timer
     handles.timer = timer(...
         'ExecutionMode','fixedRate', ...
-        'Period',0.08, ...
+        'Period',0.05, ...
         'TimerFcn',{@timer_Callback,handles}, ...
         'ErrorFcn',{@timer_ErrorFcn,handles});
     % Save handles to guidata
@@ -127,7 +127,12 @@ function menu_multimedia_Callback(hObject,~)
     % Reset the GUI elements
     program_reset(handles);
     handles.vlc.playlist.items.clear();
-    handles.rating = [];
+    global ratings;
+    global last_ts_vlc;
+    global last_ts_sys;
+    ratings = [];
+    last_ts_vlc = 0;
+    last_ts_sys = zeros(1,6);
     % Browse for, load, and get text_duration for a multimedia file
     [video_name,video_path] = uigetfile({'*.*','All Files (*.*)'},'Select an audio or video file');
     if video_name==0, return; end
@@ -204,12 +209,24 @@ end
 function timer_Callback(~,~,handles)
     handles = guidata(handles.figure_collect);
     global settings;
+    global ratings;
+    global last_ts_vlc;
+    global last_ts_sys;
     % While playing
     if handles.vlc.input.state == 3
-        handles.rating = [handles.rating; handles.vlc.input.time/1000,get(handles.slider,'value')];
+        ts_vlc = handles.vlc.input.time;
+        ts_sys = clock;
+        if ts_vlc == last_ts_vlc && last_ts_vlc ~= 0
+            ts_diff = ts_sys(6) - last_ts_sys(6);
+            if ts_diff < 0, ts_diff = 60+ts_diff; end
+            ts_vlc = ts_vlc + ts_diff*1000;
+        else
+            last_ts_vlc = ts_vlc;
+            last_ts_sys = ts_sys;
+        end
+        ratings = [ratings; ts_vlc/1000,get(handles.slider,'value')];
         set(handles.text_report,'string',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
         drawnow();
-        guidata(handles.figure_collect,handles);
     % After playing
     elseif handles.vlc.input.state == 5 || handles.vlc.input.state == 6
         stop(handles.timer);
@@ -217,7 +234,8 @@ function timer_Callback(~,~,handles)
         set(handles.toggle_playpause,'Value',0);
         set(handles.text_report,'string','Processing...');
         % Average ratings per second of playback
-        rating = handles.rating;
+        rating = ratings;
+        disp(rating);
         mean_ratings = [];
         anchors = [0,(1/settings.sps:1/settings.sps:handles.dur)];
         for i = 1:length(anchors)-1
