@@ -240,7 +240,7 @@ function timer_Callback(~,~,handles)
         rating = ratings;
         disp(rating);
         anchors = [0,(1/settings.sps:1/settings.sps:floor(handles.dur))];
-        mean_ratings = nan(length(anchors)-1,4);
+        mean_ratings = nan(length(anchors)-1,2);
         mean_ratings(:,1) = anchors(2:end)';
         for i = 1:length(anchors)-1
             s_start = anchors(i);
@@ -305,8 +305,6 @@ function timer_ErrorFcn(~,~,handles)
     handles.vlc.playlist.togglePause();
     stop(handles.timer);
     msgbox('Timer callback error.','Error','error');
-    disp(handles.rating);
-    csvwrite(sprintf('%s.csv',datestr(now,30)),handles.rating);
     guidata(handles.figure_collect,handles);
 end
 
