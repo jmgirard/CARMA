@@ -116,8 +116,8 @@ function fig_collect
         'TimerFcn',{@timer_Callback,handles}, ...
         'ErrorFcn',{@timer_ErrorFcn,handles});
     % Start system clock to improve VLC time stamp precision
-        global global_tic;
-        global_tic = tic;
+    global global_tic;
+    global_tic = tic;
     % Save handles to guidata
     handles.figure_collect.Visible = 'on';
     guidata(handles.figure_collect,handles);
@@ -239,14 +239,15 @@ function timer_Callback(~,~,handles)
         % Average ratings per second of playback
         rating = ratings;
         disp(rating);
-        mean_ratings = [];
-        anchors = [0,(1/settings.sps:1/settings.sps:handles.dur)];
+        anchors = [0,(1/settings.sps:1/settings.sps:floor(handles.dur))];
+        mean_ratings = nan(length(anchors)-1,4);
+        mean_ratings(:,1) = anchors(2:end)';
         for i = 1:length(anchors)-1
             s_start = anchors(i);
             s_end = anchors(i+1);
             index = (rating(:,1) >= s_start) & (rating(:,1) < s_end);
             bin = rating(index,2:end);
-            mean_ratings = [mean_ratings;s_end,mean(bin)];
+            mean_ratings(i,:) = [s_end,nanmean(bin)];
         end
         % Prompt user to save the collected annotations
         [~,defaultname,ext] = fileparts(handles.MRL);
