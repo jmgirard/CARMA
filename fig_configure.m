@@ -27,11 +27,18 @@ function fig_configure
     handles.panel_sampling = uipanel( ...
         'Parent',handles.figure_configure, ...
         'Position',[c1 .25 c1*2+.92 .1]);
+    handles.push_default = uicontrol(...
+        'Parent',handles.figure_configure, ...
+        'Units','Normalized', ...
+        'Position',[c1 .05 .92/3 .15], ...
+        'String','Save as Default', ...
+        'Callback',@push_default_Callback);
     handles.push_submit = uicontrol(...
         'Parent',handles.figure_configure, ...
         'Units','Normalized', ...
         'Position',[c1*3+.92*2/3 .05 .92/3 .15], ...
         'String','Apply Current Settings', ...
+        'FontWeight','bold', ...
         'Callback',@push_submit_Callback);
     % Create uicontrol elements in panel_slider
     nr = 5; %number of rows
@@ -206,7 +213,7 @@ end
 % ===============================================================================
 
 function Settings = get_settings(handles)
-    handles = guidata(handles.figure_settings);
+    handles = guidata(handles.figure_configure);
     % Get current configuration from GUI elements
     Settings.axis_lower = get(handles.text_axis_lower,'string');
     Settings.axis_upper = get(handles.text_axis_upper,'string');
@@ -217,7 +224,15 @@ function Settings = get_settings(handles)
     Settings.axis_max = get(handles.text_axis_max,'string');
     Settings.axis_steps = get(handles.text_axis_steps,'string');
     Settings.sps = get(get(handles.bgroup_samples,'SelectedObject'),'string');
+end
 
+% ===============================================================================
+
+function push_default_Callback(hObject,~)
+    handles = guidata(hObject);
+    Settings = get_settings(handles);
+    save('default.mat','Settings');
+    msgbox('Saved current settings as default. Next time CARMA is opened, these settings will be used.');
 end
 
 % ===============================================================================
