@@ -53,7 +53,11 @@ function fig_launcher
     guidata(handles.figure_launcher,handles);
     % Configure default settings
     global settings;
-    settings = importdata('default.mat');
+    if isdeployed
+        settings = importdata(fullfile(ctfroot,'CARMA','default.mat'));
+    else
+        settings = importdata('default.mat');
+    end
     % Check that VLC is installed
     axctl = actxcontrollist;
     index = strcmp(axctl(:,2),'VideoLAN.VLCPlugin.2');

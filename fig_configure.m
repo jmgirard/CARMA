@@ -220,10 +220,10 @@ function Settings = get_settings(handles)
     Settings.axis_color1 = get(handles.button_axis_color1,'BackgroundColor');
     Settings.axis_color2 = get(handles.button_axis_color2,'BackgroundColor');
     Settings.axis_color3 = get(handles.button_axis_color3,'BackgroundColor');
-    Settings.axis_min = get(handles.text_axis_min,'string');
-    Settings.axis_max = get(handles.text_axis_max,'string');
-    Settings.axis_steps = get(handles.text_axis_steps,'string');
-    Settings.sps = get(get(handles.bgroup_samples,'SelectedObject'),'string');
+    Settings.axis_min = str2double(get(handles.text_axis_min,'string'));
+    Settings.axis_max = str2double(get(handles.text_axis_max,'string'));
+    Settings.axis_steps = str2double(get(handles.text_axis_steps,'string'));
+    Settings.sps = str2double(get(get(handles.bgroup_samples,'SelectedObject'),'string'));
 end
 
 % ===============================================================================
@@ -231,7 +231,11 @@ end
 function push_default_Callback(hObject,~)
     handles = guidata(hObject);
     Settings = get_settings(handles);
-    save('default.mat','Settings');
+    if isdeployed
+        save(fullfile(ctfroot,'CARMA','default.mat'),'Settings');
+    else
+        save('default.mat','Settings');
+    end
     msgbox('Saved current settings as default. Next time CARMA is opened, these settings will be used.');
 end
 
