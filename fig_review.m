@@ -151,7 +151,12 @@ end
 function menu_export_Callback(hObject,~)
     handles = guidata(hObject);
     global settings;
-    [~,defaultname,ext] = fileparts(handles.MRL);
+    if ~isfield(handles,'MRL')
+        defaultname = '';
+        ext = '';
+    else
+        [~,defaultname,ext] = fileparts(handles.MRL);
+    end
     output = [ ...
         {'Time of Rating'},{datestr(now)}; ...
         {'Multimedia File'},{sprintf('%s%s',defaultname,ext)}; ...
@@ -453,6 +458,7 @@ end
 % =========================================================
 
 function [box] = reliability( X )
+    k = size(X,2);
     if k == 1
         box = {'[01] Mean',num2str(nanmean(X),'%.0f'); ...
             '[01] SD',num2str(nanstd(X),'%.0f')};
