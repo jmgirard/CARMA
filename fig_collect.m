@@ -109,6 +109,16 @@ function fig_collect
     handles.vlc.AutoPlay = 0;
     handles.vlc.Toolbar = 0;
     handles.vlc.FullscreenEnabled = 0;
+    if strcmp(settings.input,'Computer Joystick')
+        try
+            handles.joy = vrjoystick(1);
+        catch
+            e = errordlg('CARMA could not detect a joystick.','Error','modal');
+            waitfor(e);
+            quit force;
+        end
+        set(handles.slider,'Enable','Inactive');
+    end
     % Create timer
     handles.timer = timer(...
         'ExecutionMode','fixedRate', ...
@@ -227,7 +237,20 @@ function timer_Callback(~,~,handles)
             last_ts_vlc = ts_vlc;
             last_ts_sys = ts_sys;
         end
-        ratings = [ratings; ts_vlc,get(handles.slider,'value')];
+        if strcmp(settings.input,'Computer Joystick')
+            [a,~,~] = read(handles.joy);
+            y = a(2) * -1;
+            axis_range = settings.axis_max - settings.axis_min;
+            axis_middle = settings.axis_min + axis_range / 2;
+            val = axis_middle + y * axis_range / 2;
+            if val > settings.axis_max || val < settings.axis_min
+                disp(val);
+            end
+            set(handles.slider,'Value',val);
+        else
+            val = get(handles.slider,'value');
+        end
+        ratings = [ratings; ts_vlc, val];
         set(handles.text_report,'string',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
         drawnow();
     % After playing
@@ -238,7 +261,7 @@ function timer_Callback(~,~,handles)
         set(handles.text_report,'string','Processing...');
         % Average ratings per second of playback
         rating = ratings;
-        disp(rating);
+        %disp(rating);
         anchors = [0,(1/settings.sps:1/settings.sps:floor(handles.dur))];
         mean_ratings = nan(length(anchors)-1,2);
         mean_ratings(:,1) = anchors(2:end)';
