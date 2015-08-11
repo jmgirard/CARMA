@@ -243,11 +243,8 @@ function timer_Callback(~,~,handles)
             axis_range = settings.axis_max - settings.axis_min;
             axis_middle = settings.axis_min + axis_range / 2;
             val = axis_middle + y * axis_range / 2;
-            if val > settings.axis_max || val < settings.axis_min
-                disp(val);
-            end
             set(handles.slider,'Value',val);
-        else
+        elseif strcmp(settings.input,'Keyboard + Mouse')
             val = get(handles.slider,'value');
         end
         ratings = [ratings; ts_vlc, val];
