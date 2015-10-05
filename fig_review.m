@@ -463,8 +463,8 @@ function [box] = reliability( X )
         box = {'[01] Mean',num2str(nanmean(X),'%.0f'); ...
             '[01] SD',num2str(nanstd(X),'%.0f')};
     elseif k > 1
-        box = {'ICC(A,1)',num2str(fx_ICC(X,'A-1'),'%.3f'); ...
-            'ICC(A,k)',num2str(fx_ICC(X,'A-k'),'%.3f')};
+        box = {'ICC(A,1)',num2str(ICC_A_1(X),'%.3f'); ...
+            'ICC(A,k)',num2str(ICC_A_k(X),'%.3f')};
         for i = 1:k
             box = [box;{sprintf('[%02d] Mean',i),num2str(nanmean(X(:,i)),'%.0f');}];
         end
