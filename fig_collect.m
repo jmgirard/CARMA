@@ -271,9 +271,7 @@ function timer_Callback(~,~,handles)
         end
         % Prompt user to save the collected annotations
         [~,defaultname,ext] = fileparts(handles.MRL);
-        [filename,pathname] = uiputfile({'*.xlsx','Excel 2007 Spreadsheet (*.xlsx)';...
-            '*.xls','Excel 2003 Spreadsheet (*.xls)';...
-            '*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
+        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
         if ~isequal(filename,0) && ~isequal(pathname,0)
             % Add metadata to mean ratings and timestamps
             output = [ ...
@@ -287,21 +285,8 @@ function timer_Callback(~,~,handles)
                 {'Second'},{'Rating'}; ...
                 {'%%%%%%'},{'%%%%%%'}; ...
                 num2cell(mean_ratings)];
-            % Create export file depending on selected file type
-            [~,~,ext] = fileparts(filename);
-            if strcmpi(ext,'.XLS') || strcmpi(ext,'.XLSX')
-                % Create XLS/XLSX file if that is the selected file type
-                [success,message] = xlswrite(fullfile(pathname,filename),output);
-                if strcmp(message.identifier,'MATLAB:xlswrite:dlmwrite')
-                    % If Excel is not installed, create CSV file instead
-                    serror = errordlg('Exporting to .XLS/.XLSX requires Microsoft Excel to be installed. CARMA will now export to .CSV instead.');
-                    uiwait(serror);
-                    success = fx_cell2csv(fullfile(pathname,filename),output);
-                end
-            elseif strcmpi(ext,'.CSV')
-                % Create CSV file if that is the selected file type
-                success = fx_cell2csv(fullfile(pathname,filename),output);
-            end
+            % Create export file as a CSV
+            success = fx_cell2csv(fullfile(pathname,filename),output);
             % Report saving success or failure
             if success
                 h = msgbox('Export successful.');
