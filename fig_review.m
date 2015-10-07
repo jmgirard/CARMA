@@ -365,7 +365,7 @@ function button_delseries_Callback(hObject,~)
         box = reliability(handles.AllRatings);
         set(handles.toggle_meanplot,'Enable','off','Value',0);
     else
-        for i = 1:size(handles.AllRatingsX,2)
+        for i = 1:size(handles.AllRatings,2)
             colorindex = mod(i,7); if colorindex==0, colorindex = 7; end
             rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',fx_rgbconv(CS(colorindex,:)),i,handles.AllFilenames{i})];
         end
