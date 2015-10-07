@@ -32,6 +32,18 @@ function fig_review
         'Parent',handles.figure_review, ...
         'Label','Export Mean Ratings', ...
         'Callback',@menu_export_Callback);
+    handles.menu_stats = uimenu(handles.figure_review, ...
+        'Parent',handles.figure_review, ...
+        'Label','Reliability Type');
+    handles.menu_agree = uimenu(handles.menu_stats, ...
+        'Parent',handles.menu_stats, ...
+        'Label','Agreement ICC', ...
+        'Checked','on', ...
+        'Callback',@menu_agree_Callback);
+    handles.menu_consist = uimenu(handles.menu_stats, ...
+        'Parent',handles.menu_stats, ...
+        'Label','Consistency ICC', ...
+        'Callback',@menu_consist_Callback);
     pause(0.1);
     %Create uicontrol elements
     lc = .01; rc = .89;
@@ -42,7 +54,7 @@ function fig_review
         'Position',[lc+.02 .04+.01 .87-.02 .15-.01], ...
         'TickLength',[0.01 0], ...
         'YLim',[-100,100],'YTick',[-100,0,100],'YGrid','on',...
-        'XLim',[0,10],'XTick',[1:10],'Box','on', ...
+        'XLim',[0,10],'XTick',(1:10),'Box','on', ...
         'ButtonDownFcn',@axis_click_Callback);
     handles.listbox = uicontrol('Style','listbox', ...
         'Parent',handles.figure_review, ...
@@ -116,6 +128,7 @@ function fig_review
     % Save handles to guidata
     guidata(handles.figure_review,handles);
     handles.figure_review.Visible = 'on';
+    global stats; stats = 'agree';
 end
 
 % ===============================================================================
@@ -170,26 +183,10 @@ function menu_export_Callback(hObject,~)
         num2cell([handles.Seconds,handles.MeanRatings])];
     defaultname = sprintf('%s_Mean',defaultname);
     %Prompt user for output filepath
-    [filename,pathname] = uiputfile({'*.xlsx','Excel 2007 Spreadsheet (*.xlsx)';...
-        '*.xls','Excel 2003 Spreadsheet (*.xls)';...
-        '*.csv','Comma-Separated Values (*.csv)'},...
-        'Save as',defaultname);
+    [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
     if isequal(filename,0), return; end
-    % Create export file depending on selected file type
-    [~,~,ext] = fileparts(filename);
-    if strcmpi(ext,'.XLS') || strcmpi(ext,'.XLSX')
-        % Create XLS/XLSX file if that is the selected file type
-        [success,message] = xlswrite(fullfile(pathname,filename),output);
-        if strcmp(message.identifier,'MATLAB:xlswrite:dlmwrite')
-            % If Excel is not installed, create CSV file instead
-            serror = errordlg('Exporting to .XLS/.XLSX requires Microsoft Excel to be installed. CARMA will now export to .CSV instead.');
-            uiwait(serror);
-            success = fx_cell2csv(fullfile(pathname,filename),output);
-        end
-    elseif strcmpi(ext,'.CSV')
-        % Create CSV file if that is the selected file type
-        success = fx_cell2csv(fullfile(pathname,filename),output);
-    end
+    % Create export file as a CSV
+    success = fx_cell2csv(fullfile(pathname,filename),output);
     % Report saving success or failure
     if success
         h = msgbox('Export successful.');
@@ -198,6 +195,32 @@ function menu_export_Callback(hObject,~)
         h = msgbox('Export error.');
         waitfor(h);
     end
+end
+
+% ===============================================================================
+
+function menu_agree_Callback(hObject,~)
+    handles = guidata(hObject);
+    global stats;
+    stats = 'agree';
+    box = reliability(handles.AllRatings);
+    set(handles.reliability,'Data',box);
+    set(handles.menu_agree,'Checked','on');
+    set(handles.menu_consist,'Checked','off');
+    guidata(handles.figure_review,handles);
+end
+
+% ===============================================================================
+
+function menu_consist_Callback(hObject,~)
+    handles = guidata(hObject);
+    global stats;
+    stats = 'consist';
+    box = reliability(handles.AllRatings);
+    set(handles.reliability,'Data',box);
+    set(handles.menu_agree,'Checked','off');
+    set(handles.menu_consist,'Checked','on');
+    guidata(handles.figure_review,handles);
 end
 
 % ===============================================================================
@@ -457,14 +480,20 @@ end
 
 % =========================================================
 
-function [box] = reliability( X )
+function [box] = reliability(X)
+    global stats;
     k = size(X,2);
     if k == 1
         box = {'[01] Mean',num2str(nanmean(X),'%.0f'); ...
             '[01] SD',num2str(nanstd(X),'%.0f')};
     elseif k > 1
-        box = {'ICC(A,1)',num2str(ICC_A_1(X),'%.3f'); ...
-            'ICC(A,k)',num2str(ICC_A_k(X),'%.3f')};
+        if strcmp(stats,'agree')
+            box = {'ICC(A,1)',num2str(ICC_A_1(X),'%.3f'); ...
+                'ICC(A,k)',num2str(ICC_A_k(X),'%.3f')};
+        elseif strcmp(stats,'consist')
+            box = {'ICC(C,1)',num2str(ICC_C_1(X),'%.3f'); ...
+                'ICC(C,k)',num2str(ICC_C_k(X),'%.3f')};
+        end
         for i = 1:k
             box = [box;{sprintf('[%02d] Mean',i),num2str(nanmean(X(:,i)),'%.0f');}];
         end
