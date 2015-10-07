@@ -228,29 +228,47 @@ end
 function button_addseries_Callback(hObject,~)
     handles = guidata(hObject);
     % Prompt user for import file.
-    [filenames,pathname] = uigetfile({'*.xls; *.xlsx; *.csv','CARMA Export Formats (*.xls, *.xlsx, *.csv)'},'Open Annotations','MultiSelect','on');
+    [filenames,pathname] = uigetfile({'*.csv;*.xls;*.xlsx','CARMA Annotations (*.csv, *.xls, *.xlsx)'},'Open Annotations','MultiSelect','on');
     if ~iscell(filenames)
         if filenames==0, return; end
         filenames = {filenames};
     end
     for f = 1:length(filenames)
         filename = filenames{f};
-        [~,~,data] = xlsread(fullfile(pathname,filename));
+        [~,~,ext] = fileparts(filename);
+        if strcmpi(ext,'.csv')
+            fileID = fopen(fullfile(pathname,filename),'r');
+            axiscell = textscan(fileID,'%*s%f%[^\n\r]',2,'Delimiter',',','HeaderLines',4,'ReturnOnError',false);
+            axis_min = axiscell{1}(1);
+            axis_max = axiscell{1}(2);
+            fclose(fileID);
+            fileID = fopen(fullfile(pathname,filename),'r');
+            datacell = textscan(fileID,'%f%f%[^\n\r]','Delimiter',',','HeaderLines',9,'ReturnOnError',false);
+            secs = datacell{1};
+            ratings = datacell{2};
+            fclose(fileID);
+        else
+            [nums,~] = xlsread(fullfile(pathname,filename),'','','basic');
+            axis_min = nums(5,2);
+            axis_max = nums(6,2);
+            secs = nums(10:end,1);
+            ratings = nums(10:end,2);
+        end
         % Check that the import file matches the multimedia file
         if isempty(handles.axis_min) || isempty(handles.axis_max)
-            handles.axis_min = data{5,2};
-            handles.axis_max = data{6,2};
-        elseif handles.axis_min ~= data{5,2} || handles.axis_max ~= data{6,2}
+            handles.axis_min = axis_min;
+            handles.axis_max = axis_max;
+        elseif handles.axis_min ~= axis_min || handles.axis_max ~= axis_max
             msgbox('Annotation files must have the same axis settings to be loaded together.','Error','Error');
             return;
         end
-        if ~isempty(handles.AllRatings) && size(handles.AllRatings,1)~=size(data(10:end,:),1)
+        if ~isempty(handles.AllRatings) && size(handles.AllRatings,1)~=size(ratings,1)
             msgbox('Annotation file must have the same sampling rate as the other annotation files.','Error','Error');
             return;
         else
             % Append the new file to the stored data
-            handles.Seconds = cell2mat(data(10:end,1));
-            handles.AllRatings = [handles.AllRatings,cell2mat(data(10:end,2))];
+            handles.Seconds = secs;
+            handles.AllRatings = [handles.AllRatings,ratings];
             [~,fn,~] = fileparts(filename);
             handles.AllFilenames = [handles.AllFilenames;fn];
             % Update mean series
