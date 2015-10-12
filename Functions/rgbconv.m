@@ -1,4 +1,4 @@
-function [x,y,z] = fx_rgbconv(a,b,c)
+function [x,y,z] = rgbconv(a,b,c)
 %RGBCONV   Convert hex color to or from matlab rgb vector.
 %   RGB = RGBCONV(HEX)  where HEX is a string of hexadecimal numbers
 %      'RRGGBB' where the parts RR, GG, BB are two digit hexadecimal

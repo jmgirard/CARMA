@@ -3,6 +3,7 @@ function fig_collect
 % License: https://carma.codeplex.com/license
 
     % Create and center main window
+    addpath('Functions');
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_collect = figure( ...
         'Units','normalized', ...
@@ -90,8 +91,8 @@ function fig_collect
     set(gca,'XLim',[0,70],'YLim',[0,450]);
     axis ij; hold on;
     % Create and display custom color gradient in rating axis
-    image([fx_colorGradient(settings.axis_color1,settings.axis_color2,225,70); ...
-        fx_colorGradient(settings.axis_color2,settings.axis_color3,225,70)]);
+    image([colorGradient(settings.axis_color1,settings.axis_color2,225,70); ...
+        colorGradient(settings.axis_color2,settings.axis_color3,225,70)]);
     % Plot hash-marks on rating axis
     for i = 1:settings.axis_steps-1
         plot([1,5],[450,450]*i/settings.axis_steps,'k-');
@@ -286,7 +287,7 @@ function timer_Callback(~,~,handles)
                 {'%%%%%%'},{'%%%%%%'}; ...
                 num2cell(mean_ratings)];
             % Create export file as a CSV
-            success = fx_cell2csv(fullfile(pathname,filename),output);
+            success = cell2csv(fullfile(pathname,filename),output);
             % Report saving success or failure
             if success
                 h = msgbox('Export successful.');

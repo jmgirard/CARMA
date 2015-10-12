@@ -3,6 +3,7 @@ function fig_review
 % License: https://carma.codeplex.com/license
 
     % Create and maximize annotation window
+    addpath('Functions');
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_review = figure( ...
         'Units','normalized', ...
@@ -220,7 +221,7 @@ function menu_export_Callback(hObject,~)
     [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
     if isequal(filename,0), return; end
     % Create export file as a CSV
-    success = fx_cell2csv(fullfile(pathname,filename),output);
+    success = cell2csv(fullfile(pathname,filename),output);
     % Report saving success or failure
     if success
         h = msgbox('Export successful.');
@@ -314,7 +315,7 @@ function button_addseries_Callback(hObject,~)
             rows = {'<html><u>Annotation Files'};
             for i = 1:size(handles.AllRatings,2)
                 colorindex = mod(i,7); if colorindex==0, colorindex = 7; end
-                rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',fx_rgbconv(CS(colorindex,:)),i,handles.AllFilenames{i})];
+                rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',rgbconv(CS(colorindex,:)),i,handles.AllFilenames{i})];
             end
             set(handles.listbox,'String',rows,'Value',size(handles.AllRatings,2)+1);
             % Update reliability box
@@ -361,13 +362,13 @@ function button_delseries_Callback(hObject,~)
         box = '';
         set(handles.toggle_meanplot,'Enable','off','Value',0);
     elseif size(handles.AllRatings,2)==1
-        rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',fx_rgbconv(CS(1,:)),1,handles.AllFilenames{1})];
+        rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',rgbconv(CS(1,:)),1,handles.AllFilenames{1})];
         box = reliability(handles.AllRatings);
         set(handles.toggle_meanplot,'Enable','off','Value',0);
     else
         for i = 1:size(handles.AllRatings,2)
             colorindex = mod(i,7); if colorindex==0, colorindex = 7; end
-            rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',fx_rgbconv(CS(colorindex,:)),i,handles.AllFilenames{i})];
+            rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',rgbconv(CS(colorindex,:)),i,handles.AllFilenames{i})];
         end
         box = reliability(handles.AllRatings);
         toggle_meanplot_Callback(handles.toggle_meanplot,[]);
@@ -388,7 +389,7 @@ function toggle_meanplot_Callback(hObject,~)
         set(handles.listbox,'Value',size(handles.AllRatings,2)+2);
         rows = {'<html><u>Annotation Files'};
         for i = 1:size(handles.AllRatings,2)
-            rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',fx_rgbconv([.8 .8 .8]),i,handles.AllFilenames{i})];
+            rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',rgbconv([.8 .8 .8]),i,handles.AllFilenames{i})];
         end
         rows = [cellstr(rows);'<html><font color="red">[M]</font> Mean Plot'];
         set(handles.listbox,'String',rows);
@@ -399,7 +400,7 @@ function toggle_meanplot_Callback(hObject,~)
         rows = {'<html><u>Annotation Files'};
         for i = 1:size(handles.AllRatings,2)
            colorindex = mod(i,7); if colorindex==0, colorindex = 7; end
-           rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',fx_rgbconv(CS(colorindex,:)),i,handles.AllFilenames{i})];
+           rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',rgbconv(CS(colorindex,:)),i,handles.AllFilenames{i})];
         end
         set(handles.listbox,'String',rows);
     end
