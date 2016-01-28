@@ -61,11 +61,11 @@ function fig_launcher
     axctl = actxcontrollist;
     index = strcmp(axctl(:,2),'VideoLAN.VLCPlugin.2');
     if sum(index)==0
-        choice = questdlg('CARMA requires the free, open source VLC Media Player (64-bit). Open download page?',...
+        choice = questdlg(sprtinf('CARMA requires the free, open source VLC Media Player.\nPlease be sure to download the 64-bit Windows version.\nPlease be sure to enable the "ActiveX plugin" option.\nOpen download page?'),...
             'CARMA','Yes','No','Yes');
         switch choice
             case 'Yes'
-                web('http://www.videolan.org/','-browser');
+                web('http://www.videolan.org/vlc/download-windows.html','-browser');
         end
         delete(handles.figure_launcher);
     end
