@@ -27,7 +27,8 @@ function fig_review
         'Callback',@button_addseries_Callback);
     handles.menu_delseries = uimenu(handles.figure_review, ...
         'Parent',handles.figure_review, ...
-        'Label','Remove Annotation Files');
+        'Label','Remove Annotation Files', ...
+        'Enable','off');
     handles.menu_delall = uimenu(handles.menu_delseries, ...
         'Parent',handles.menu_delseries, ...
         'Label','Remove All Files', ...
@@ -35,10 +36,11 @@ function fig_review
     handles.menu_delone = uimenu(handles.menu_delseries, ...
         'Parent',handles.menu_delseries, ...
         'Label','Remove Selected File', ...
-        'Callback',@button_delone_Callback);
+        'Callback',@button_delseries_Callback);
     handles.menu_export = uimenu(handles.figure_review, ...
         'Parent',handles.figure_review, ...
         'Label','Export Mean Ratings', ...
+        'Enable','off', ...
         'Callback',@menu_export_Callback);
     handles.menu_stats = uimenu(handles.figure_review, ...
         'Parent',handles.figure_review, ...
@@ -187,6 +189,7 @@ function menu_delall_Callback(hObject,~)
     rows = {'<html><u>Annotation Files'};
     box = '';
     set(handles.toggle_meanplot,'Enable','off','Value',0);
+    set(handles.menu_delseries,'Enable','off');
     set(handles.menu_export,'Enable','off');
     set(handles.listbox,'String',rows);
     set(handles.reliability,'Data',box);
@@ -322,6 +325,9 @@ function button_addseries_Callback(hObject,~)
             box = reliability(handles.AllRatings);
             set(handles.reliability,'Data',box);
             guidata(handles.figure_review,handles);
+            % Enable menu options
+            set(handles.menu_delseries,'Enable','on');
+            set(handles.menu_export,'Enable','on');
         end
     end
     set(handles.toggle_meanplot,'Enable','on');
@@ -361,6 +367,8 @@ function button_delseries_Callback(hObject,~)
     if isempty(handles.AllRatings)
         box = '';
         set(handles.toggle_meanplot,'Enable','off','Value',0);
+        set(handles.menu_delseries,'Enable','off');
+        set(handles.menu_export,'Enable','off');
     elseif size(handles.AllRatings,2)==1
         rows = [cellstr(rows);sprintf('<html><font color="%s">[%02d]</font> %s',rgbconv(CS(1,:)),1,handles.AllFilenames{1})];
         box = reliability(handles.AllRatings);
