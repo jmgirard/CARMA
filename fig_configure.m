@@ -198,7 +198,7 @@ function fig_configure
         case 'USB Joystick'
             set(handles.popup_input,'Value',2);
         case 'I-CubeX Slider'
-            set(hadnles.popup_input,'Value',3);
+            set(handles.popup_input,'Value',3);
     end
     switch settings.sps
         case 0.25
