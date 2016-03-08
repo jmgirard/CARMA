@@ -99,10 +99,15 @@ function fig_collect
         plot([65,70],[450,450]*i/settings.axis_steps,'k-');
     end
     % Plot numerical labels on rating axis
-    lin = linspace(settings.axis_max,settings.axis_min,settings.axis_steps);
-    for i = 1:length(lin)
-        text(37.5,(((450*(i-1))/settings.axis_steps)+((450*i)/settings.axis_steps))/2,...
-            sprintf('%.2f',lin(i)),'HorizontalAlignment','center');
+    axis_labels = linspace(settings.axis_max,settings.axis_min,settings.axis_steps);
+    for i = 1:length(axis_labels)
+        xval = 37.5;
+        yval = (((450*(i-1))/settings.axis_steps)+((450*i)/settings.axis_steps))/2;
+        text(xval-1,yval,sprintf('%.2f',axis_labels(i)),'HorizontalAlignment','center','Color','black','Fontweight','bold');
+        text(xval+1,yval,sprintf('%.2f',axis_labels(i)),'HorizontalAlignment','center','Color','black','Fontweight','bold');
+        text(xval,yval-1,sprintf('%.2f',axis_labels(i)),'HorizontalAlignment','center','Color','black','Fontweight','bold');
+        text(xval,yval+1,sprintf('%.2f',axis_labels(i)),'HorizontalAlignment','center','Color','black','Fontweight','bold');
+        text(xval,yval,sprintf('%.2f',axis_labels(i)),'HorizontalAlignment','center','Color','white','Fontweight','bold');
     end
     hold off;
     % Invoke and configure VLC ActiveX Controller
