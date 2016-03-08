@@ -24,7 +24,7 @@ function fig_launcher
         'Box','on','XTick',[],'YTick',[],...
         'ButtonDownFcn',@website);
     xlim([-1 1]); ylim([-1 1]);
-    text(0,0,'CARMA v11.00','Color',[1 1 1],'FontSize',44,...
+    text(0,0,'CARMA v12.00','Color',[1 1 1],'FontSize',44,...
         'FontName','cambria','HorizontalAlignment','center',...
         'ButtonDownFcn',@website);
     handles.push_collect = uicontrol('Style','pushbutton', ...
@@ -72,7 +72,14 @@ function fig_launcher
 end
 
 function push_collect_Callback(~,~)
-    fig_collect;
+    global settings;
+    if strcmp(settings.input,'Computer Mouse')
+        fig_collect_mouse;
+    elseif strcmp(settings.input,'USB Joystick')
+        fig_collect_device;
+    elseif strcmp(settings.input,'iCubeX Slider')
+        fig_collect_device;
+    end
 end
 
 function push_review_Callback(~,~)
