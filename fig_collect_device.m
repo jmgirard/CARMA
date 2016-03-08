@@ -23,13 +23,12 @@ function fig_collect_device
         'Callback',@menu_multimedia_Callback);
     pause(0.1);
     set(handles.figure_collect,'Position',[0.1 0.1 0.8 0.8]);
-    global settings;
+    global settings global_tic recording;
     % Create uicontrol elements
     handles.text_report = uicontrol('Style','edit', ...
         'Parent',handles.figure_collect, ...
         'Units','Normalized', ...
         'Position',[.01 .02 .22 .05], ...
-        'String','Open File', ...
         'FontSize',14.0, ...
         'Enable','off');
     handles.text_filename = uicontrol('Style','edit', ...
@@ -51,7 +50,7 @@ function fig_collect_device
         'String','Play', ...
         'FontSize',14.0, ...
         'Callback',@toggle_playpause_Callback, ...
-        'Enable','inactive');
+        'Enable','off');
     handles.axis_upper = uicontrol('Style','text', ...
         'Parent',handles.figure_collect, ...
         'Units','Normalized', ...
@@ -109,7 +108,7 @@ function fig_collect_device
     handles.vlc.AutoPlay = 0;
     handles.vlc.Toolbar = 0;
     handles.vlc.FullscreenEnabled = 0;
-    if strcmp(settings.input,'Computer Joystick')
+    if strcmp(settings.input,'USB Joystick')
         try
             handles.joy = vrjoystick(1);
         catch
@@ -125,11 +124,11 @@ function fig_collect_device
         'TimerFcn',{@timer_Callback,handles}, ...
         'ErrorFcn',{@timer_ErrorFcn,handles});
     % Start system clock to improve VLC time stamp precision
-    global global_tic;
     global_tic = tic;
-    % Save handles to guidata
+    recording = 0;
     handles.figure_collect.Visible = 'on';
     guidata(handles.figure_collect,handles);
+    start(handles.timer);
 end
 
 % =========================================================
@@ -139,9 +138,7 @@ function menu_multimedia_Callback(hObject,~)
     % Reset the GUI elements
     program_reset(handles);
     handles.vlc.playlist.items.clear();
-    global ratings;
-    global last_ts_vlc;
-    global last_ts_sys;
+    global ratings last_ts_vlc last_ts_sys;
     ratings = [];
     last_ts_vlc = 0;
     last_ts_sys = 0;
@@ -175,12 +172,13 @@ end
 
 function figure_collect_KeyPress(hObject,eventdata)
     handles = guidata(hObject);
+    global recording;
     % Escape if the playpause button is disabled
     if strcmp(get(handles.toggle_playpause,'enable'),'inactive'), return; end
     % Pause playback if the pressed key is spacebar
     if strcmp(eventdata.Key,'space') && get(handles.toggle_playpause,'value')
         handles.vlc.playlist.togglePause();
-        stop(handles.timer);
+        recording = 0;
         set(handles.toggle_playpause,'String','Resume','Value',0);
     else
         return;
@@ -192,9 +190,9 @@ end
 
 function toggle_playpause_Callback(hObject,~)
     handles = guidata(hObject);
+    global recording;
     if get(hObject,'Value')
         % If toggle button is set to play, update GUI elements
-        start(handles.timer);
         set(hObject,'Enable','Off','String','...');
         set(handles.menu_multimedia,'Enable','off');
         % Start three second countdown before starting
@@ -202,14 +200,14 @@ function toggle_playpause_Callback(hObject,~)
         set(handles.text_report,'String','..2..'); pause(1);
         set(handles.text_report,'String','.1.'); pause(1);
         set(hObject,'Enable','On','String','Pause');
+        recording = 1;
         guidata(hObject,handles);
         % Send play() command to VLC and wait for it to start playing
         handles.vlc.playlist.play();
     else
         % If toggle button is set to pause, send pause() command to VLC
         handles.vlc.playlist.togglePause();
-        stop(handles.timer);
-        handles.recording = 0;
+        recording = 0;
         set(hObject,'String','Resume','Value',0);
         guidata(hObject,handles);
     end
@@ -219,11 +217,17 @@ end
 
 function timer_Callback(~,~,handles)
     handles = guidata(handles.figure_collect);
-    global settings;
-    global ratings;
-    global last_ts_vlc;
-    global last_ts_sys;
-    global global_tic;
+    global settings ratings last_ts_vlc last_ts_sys global_tic recording;
+    if recording == 0
+        [joystatus,~,~] = read(handles.joy); %ranges from -1 to 1
+        y = joystatus(2) * -1; %read y value and reverse its sign
+        axis_range = settings.axis_max - settings.axis_min;
+        axis_middle = settings.axis_min + axis_range / 2;
+        val = axis_middle + y * axis_range / 2; %scale to user axis
+        set(handles.plot_line,'XData',[0 100],'YData',[val val]);
+        set(handles.plot_marker,'XData',50,'YData',val,'MarkerFaceColor','white');
+        return;
+    end
     % While playing
     if handles.vlc.input.state == 3
         ts_vlc = handles.vlc.input.time/1000;
@@ -235,14 +239,14 @@ function timer_Callback(~,~,handles)
             last_ts_vlc = ts_vlc;
             last_ts_sys = ts_sys;
         end
-        if strcmp(settings.input,'Computer Joystick')
+        if strcmp(settings.input,'USB Joystick')
             [joystatus,~,~] = read(handles.joy); %ranges from -1 to 1
             y = joystatus(2) * -1; %read y value and reverse its sign
             axis_range = settings.axis_max - settings.axis_min;
             axis_middle = settings.axis_min + axis_range / 2;
             val = axis_middle + y * axis_range / 2; %scale to user axis
             set(handles.plot_line,'XData',[0 100],'YData',[val val]);
-            set(handles.plot_marker,'XData',50,'YData',val);
+            set(handles.plot_marker,'XData',50,'YData',val,'MarkerFaceColor','red');
         elseif strcmp(settings.input,'iCubeX Slider')
             %Add command to read value from slider
 %             axis_range = settings.axis_max - settings.axis_min;
@@ -257,9 +261,9 @@ function timer_Callback(~,~,handles)
         drawnow();
     % After playing
     elseif handles.vlc.input.state == 5 || handles.vlc.input.state == 6
-        stop(handles.timer);
         handles.vlc.playlist.stop();
         set(handles.toggle_playpause,'Value',0);
+        recording = 0;
         set(handles.text_report,'string','Processing...');
         % Average ratings per second of playback
         rating = ratings;
@@ -359,6 +363,7 @@ function figure_collect_CloseReq(hObject,~)
         end
     else
         %If ratings are not being collected, exit DARMA
+        stop(handles.timer);
         delete(handles.timer);
         delete(gcf);
     end
@@ -368,7 +373,7 @@ end
 
 function program_reset(handles)
     handles = guidata(handles.figure_collect);
-    global settings;
+    global settings recording;
     % Update GUI elements to starting configuration
     set(handles.text_report,'String','Open File');
     set(handles.text_filename,'String','');
@@ -380,5 +385,6 @@ function program_reset(handles)
     set(handles.plot_line,'XData',[0 100],'YData',[midpoint midpoint]);
     set(handles.plot_marker,'XData',50,'YData',midpoint);
     drawnow();
+    recording = 0;
     guidata(handles.figure_collect,handles);
 end
