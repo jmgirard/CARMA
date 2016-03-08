@@ -115,16 +115,6 @@ function fig_collect_mouse
     handles.vlc.AutoPlay = 0;
     handles.vlc.Toolbar = 0;
     handles.vlc.FullscreenEnabled = 0;
-    if strcmp(settings.input,'Computer Joystick')
-        try
-            handles.joy = vrjoystick(1);
-        catch
-            e = errordlg('CARMA could not detect a joystick.','Error','modal');
-            waitfor(e);
-            quit force;
-        end
-        set(handles.slider,'Enable','Inactive');
-    end
     % Create timer
     handles.timer = timer(...
         'ExecutionMode','fixedRate', ...
@@ -146,9 +136,7 @@ function menu_multimedia_Callback(hObject,~)
     % Reset the GUI elements
     program_reset(handles);
     handles.vlc.playlist.items.clear();
-    global ratings;
-    global last_ts_vlc;
-    global last_ts_sys;
+    global ratings last_ts_vlc last_ts_sys;
     ratings = [];
     last_ts_vlc = 0;
     last_ts_sys = 0;
@@ -227,11 +215,7 @@ end
 
 function timer_Callback(~,~,handles)
     handles = guidata(handles.figure_collect);
-    global settings;
-    global ratings;
-    global last_ts_vlc;
-    global last_ts_sys;
-    global global_tic;
+    global settings ratings last_ts_vlc last_ts_sys global_tic;
     % While playing
     if handles.vlc.input.state == 3
         ts_vlc = handles.vlc.input.time/1000;
@@ -243,16 +227,7 @@ function timer_Callback(~,~,handles)
             last_ts_vlc = ts_vlc;
             last_ts_sys = ts_sys;
         end
-        if strcmp(settings.input,'Computer Joystick')
-            [a,~,~] = read(handles.joy);
-            y = a(2) * -1;
-            axis_range = settings.axis_max - settings.axis_min;
-            axis_middle = settings.axis_min + axis_range / 2;
-            val = axis_middle + y * axis_range / 2;
-            set(handles.slider,'Value',val);
-        elseif strcmp(settings.input,'Keyboard + Mouse')
-            val = get(handles.slider,'value');
-        end
+        val = get(handles.slider,'value');
         ratings = [ratings; ts_vlc, val];
         set(handles.text_report,'string',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
         drawnow();

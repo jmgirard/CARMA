@@ -147,7 +147,7 @@ function fig_configure
         'Units','normalized', ...
         'Position',[c1*2 r2 1-c1*4 h], ...
         'Style','popupmenu', ...
-        'String',{'Computer Mouse','USB Joystick','iCubeX Slider'});
+        'String',{'Computer Mouse','USB Joystick','I-CubeX Slider'});
     % Create sampling controls
     uicontrol(handles.panel_sampling, ...
         'Style','text', ...
@@ -197,7 +197,7 @@ function fig_configure
             set(handles.popup_input,'Value',1);
         case 'USB Joystick'
             set(handles.popup_input,'Value',2);
-        case 'iCubeX Slider'
+        case 'I-CubeX Slider'
             set(hadnles.popup_input,'Value',3);
     end
     switch settings.sps

@@ -116,6 +116,32 @@ function fig_collect_device
             waitfor(e);
             quit force;
         end
+    elseif strcmp(settings.input,'I-CubeX Slider')
+        try
+            handles.com = serial('COM3');
+            fopen(handles.com);
+        catch
+            e = errordlg('CARMA could not connect to the COM3 port to access an I-CubeX Push Slider.','Error','modal');
+            waitfor(e);
+            quit force;
+        end
+        fwrite(handles.com,[240 125 0 90 0 247]); % send host mode message to digitizer
+        fwrite(handles.com,[240 125 0 34 247]); % send reset message to digitizer
+        fwrite(handles.com,[240 125 0 3 0 50 247]); % send interval message to digitizer to set sampling interval to 50 ms 
+        fwrite(handles.com,[240 125 0 2 64 247]); % send resolution message to digitizer to set sampling resolution to 10-bit
+        pause(3); % wait until the digitizer has sent host mode and reset confirmation messages
+        try
+            b = get(handles.com, 'BytesAvailable'); % find out how many bytes are in the buffer
+            fread(handles.com,b); % empty buffer
+        catch
+            e = errordlg('CARMA connected to the COM3 port but did not find an I-CubeX Push Slider.','Error','modal');
+            waitfor(e);
+            quit force;
+        end
+        fwrite(handles.com,[240 125 0 1 64 247]); % send stream message to digitizer to turn on continuous sampling for input 1
+        while get(handles.com, 'BytesAvailable') < 6 % wait for digitizer to send confirmation message (6 bytes)
+        end
+        fread(handles.com,6); % empty buffer of confirmation message bytes
     end
     % Create timer
     handles.timer = timer(...
@@ -219,18 +245,29 @@ function timer_Callback(~,~,handles)
     handles = guidata(handles.figure_collect);
     global settings ratings last_ts_vlc last_ts_sys global_tic recording;
     if recording == 0
-        [joystatus,~,~] = read(handles.joy); %ranges from -1 to 1
-        y = joystatus(2) * -1; %read y value and reverse its sign
-        axis_range = settings.axis_max - settings.axis_min;
-        axis_middle = settings.axis_min + axis_range / 2;
-        val = axis_middle + y * axis_range / 2; %scale to user axis
-        set(handles.plot_line,'XData',[0 100],'YData',[val val]);
-        set(handles.plot_marker,'XData',50,'YData',val,'MarkerFaceColor','white');
+        if strcmp(settings.input,'USB Joystick')
+            [joystatus,~,~] = read(handles.joy); %ranges from -1 to 1
+            y = joystatus(2) * -1; %read y value and reverse its sign
+            axis_range = settings.axis_max - settings.axis_min;
+            axis_middle = settings.axis_min + axis_range / 2;
+            val = axis_middle + y * axis_range / 2; %scale to user axis
+            set(handles.plot_line,'XData',[0 100],'YData',[val val]);
+            set(handles.plot_marker,'XData',50,'YData',val,'MarkerFaceColor','white');
+        elseif strcmp(settings.input,'I-CubeX Slider')
+            while get(handles.com,'BytesAvailable') < 7  % wait for digitizer to send hi-res data message (7 bytes) 
+            end
+            comstatus = fread(handles.com,7); % read data from buffer
+            y = comstatus(5)*8 + comstatus(6); % calculate the sensor value from MSB and LSB
+            val = settings.axis_min + y * (settings.axis_max - settings.axis_min) / 1044;
+            set(handles.plot_line,'XData',[0 100],'YData',[val val]);
+            set(handles.plot_marker,'XData',50,'YData',val,'MarkerFaceColor','white');
+            drawnow(); %update the joystick indicator position
+        end
         return;
     end
     % While playing
     if handles.vlc.input.state == 3
-        ts_vlc = handles.vlc.input.time/1000;
+        ts_vlc = handles.vlc.input.time / 1000;
         ts_sys = toc(global_tic);
         if ts_vlc == last_ts_vlc && last_ts_vlc ~= 0
             ts_diff = ts_sys - last_ts_sys;
@@ -247,14 +284,15 @@ function timer_Callback(~,~,handles)
             val = axis_middle + y * axis_range / 2; %scale to user axis
             set(handles.plot_line,'XData',[0 100],'YData',[val val]);
             set(handles.plot_marker,'XData',50,'YData',val,'MarkerFaceColor','red');
-        elseif strcmp(settings.input,'iCubeX Slider')
-            %Add command to read value from slider
-%             axis_range = settings.axis_max - settings.axis_min;
-%             axis_middle = settings.axis_min + axis_range / 2;
-%             val = axis_middle + y * axis_range / 2; %scale to user axis
-%             set(handles.plot_line,'XData',[0 100],'YData',[val val]);
-%             set(handles.plot_marker,'XData',50,'YData',val);
-%             drawnow(); %update the joystick indicator position
+        elseif strcmp(settings.input,'I-CubeX Slider')
+            while get(handles.com,'BytesAvailable') < 7  % wait for digitizer to send hi-res data message (7 bytes) 
+            end
+            comstatus = fread(handles.com,7); % read data from buffer
+            y = comstatus(5)*8 + comstatus(6); % calculate the sensor value from MSB and LSB
+            val = settings.axis_min + y * (settings.axis_max - settings.axis_min) / 1044;
+            set(handles.plot_line,'XData',[0 100],'YData',[val val]);
+            set(handles.plot_marker,'XData',50,'YData',val,'MarkerFaceColor','red');
+            drawnow(); %update the joystick indicator position
         end
         ratings = [ratings; ts_vlc, val];
         set(handles.text_report,'string',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
@@ -365,6 +403,7 @@ function figure_collect_CloseReq(hObject,~)
         %If ratings are not being collected, exit DARMA
         stop(handles.timer);
         delete(handles.timer);
+        fclose(handles.com);
         delete(gcf);
     end
 end

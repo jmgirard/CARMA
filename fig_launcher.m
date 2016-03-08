@@ -77,7 +77,7 @@ function push_collect_Callback(~,~)
         fig_collect_mouse;
     elseif strcmp(settings.input,'USB Joystick')
         fig_collect_device;
-    elseif strcmp(settings.input,'iCubeX Slider')
+    elseif strcmp(settings.input,'I-CubeX Slider')
         fig_collect_device;
     end
 end
