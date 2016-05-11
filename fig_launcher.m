@@ -24,7 +24,7 @@ function fig_launcher
         'Box','on','XTick',[],'YTick',[],...
         'ButtonDownFcn',@website);
     xlim([-1 1]); ylim([-1 1]);
-    text(0,0,'CARMA v12.01','Color',[1 1 1],'FontSize',44,...
+    text(0,0,'CARMA v13.00','Color',[1 1 1],'FontSize',44,...
         'FontName','cambria','HorizontalAlignment','center',...
         'ButtonDownFcn',@website);
     handles.push_collect = uicontrol('Style','pushbutton', ...
@@ -68,6 +68,23 @@ function fig_launcher
                 web('http://www.videolan.org/vlc/download-windows.html','-browser');
         end
         delete(handles.figure_launcher);
+    end
+    % Check for updates
+    try
+        rss = urlread('http://carma.codeplex.com/project/feeds/rss?ProjectRSSFeed=codeplex%3a%2f%2frelease%2fcarma');
+        index = strfind(rss,'CARMA v');
+        newest = str2double(rss(index(1)+7:index(1)+11));
+        current = 13.00;
+        if current < newest
+            choice = questdlg(sprintf('CARMA has detected that an update is available.\nOpen download page?'),...
+                'CARMA','Yes','No','Yes');
+            switch choice
+                case 'Yes'
+                    web('http://carma.codeplex.com/releases/','-browser');
+            end
+            delete(handles.figure_launcher);
+        end
+    catch
     end
 end
 

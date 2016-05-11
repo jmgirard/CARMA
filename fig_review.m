@@ -326,7 +326,6 @@ function button_addseries_Callback(hObject,~)
             % Update mean series
             handles.MeanRatings = nanmean(handles.AllRatings,2);
             guidata(hObject,handles);
-            update_plots(handles);
             % Update list box
             CS = get(gca,'ColorOrder');
             rows = {'<html><u>Annotation Files'};
@@ -344,6 +343,7 @@ function button_addseries_Callback(hObject,~)
             set(handles.menu_export,'Enable','on');
         end
     end
+    update_plots(handles);
     update_boxplots(handles.figure_review,[]);
     set(handles.toggle_meanplot,'Enable','on');
     guidata(handles.figure_review,handles);
