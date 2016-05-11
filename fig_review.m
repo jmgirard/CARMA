@@ -61,9 +61,9 @@ function fig_review
         'Parent',handles.figure_review, ...
         'Units','Normalized', ...
         'OuterPosition',[0 0 1 1], ...
-        'Position',[lc+.02 .04+.01 .87-.02 .15-.01], ...
+        'Position',[lc+.02 .04+.01 .87-.02 .35-.01], ...
         'TickLength',[0.01 0], ...
-        'YLim',[-100,100],'YTick',[-100,0,100],'YGrid','on',...
+        'YLim',[-100,100],'YTick',[-100,-50,0,50,100],'YGrid','on',...
         'XLim',[0,10],'XTick',(1:10),'Box','on', ...
         'ButtonDownFcn',@axis_click_Callback);
     handles.listbox = uicontrol('Style','listbox', ...
@@ -115,8 +115,20 @@ function fig_review
     handles.axis_guide = axes(...
         'Parent',handles.figure_review, ...
         'Units','Normalized', ...
-        'Position',[.01 .21 .87 .775], ...
+        'Position',[.01 .42 .50 .565], ...
         'Box','on','XTick',[],'YTick',[],'Color','black');
+    handles.axis_summary = axes('Units','normalized', ...
+        'Parent',handles.figure_review, ...
+        'OuterPosition',[.53 .42 .35 .565], ...
+        'Box','on', ...
+        'YLim',[-100,100], ...
+        'YTick',[-100,-50,0,50,100], ...
+        'YGrid','on', ...
+        'XLim',[-1 1], ...
+        'XTick',0, ...
+        'XTickLabel','No Annotation Files Loaded', ...
+        'NextPlot','add', ...
+        'LooseInset',[0 0 0 0]);
     % Invoke and configure WMP ActiveX Controller
     handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_review);
     handles.vlc.AutoPlay = 0;
@@ -184,6 +196,8 @@ function menu_delall_Callback(hObject,~)
     handles.axis_max = zeros(0,1);
     cla(handles.axis_annotations);
     set(handles.axis_annotations,'PickableParts','none');
+    cla(handles.axis_summary);
+    set(handles.axis_summary,'XLim',[-1,1],'XTick',0,'XTickLabel','No Annotation Files Loaded');
     % Update list box
     set(handles.listbox,'Value',1);
     rows = {'<html><u>Annotation Files'};
@@ -330,6 +344,7 @@ function button_addseries_Callback(hObject,~)
             set(handles.menu_export,'Enable','on');
         end
     end
+    update_boxplots(handles.figure_review,[]);
     set(handles.toggle_meanplot,'Enable','on');
     guidata(handles.figure_review,handles);
 end
@@ -351,6 +366,8 @@ function button_delseries_Callback(hObject,~)
         handles.axis_max = zeros(0,1);
         cla(handles.axis_annotations);
         set(handles.axis_annotations,'PickableParts','none');
+        cla(handles.axis_summary);
+        set(handles.axis_summary,'XLim',[-1,1],'XTick',0,'XTickLabel','No Annotation Files Loaded');
     else
         % Remove selected item from list
         handles.AllRatings(:,index) = [];
@@ -359,6 +376,7 @@ function button_delseries_Callback(hObject,~)
         handles.MeanRatings = nanmean(handles.AllRatings,2);
         guidata(handles.figure_review,handles);
         update_plots(handles);
+        update_boxplots(handles.figure_review,[]);
     end
     % Update list box
     set(handles.listbox,'Value',1);
@@ -496,7 +514,7 @@ function update_plots(handles)
         plot(handles.Seconds,handles.AllRatings,'-','LineWidth',2,'ButtonDownFcn',@axis_click_Callback);
         ylim([handles.axis_min,handles.axis_max]);
         xlim([0,ceil(max(handles.Seconds))+1]);
-        set(gca,'YGrid','on','YTick',[handles.axis_min,handles.axis_max-(handles.axis_max-handles.axis_min)/2,handles.axis_max]);
+        set(gca,'YGrid','on','YTick',linspace(handles.axis_min,handles.axis_max,5));
         set(handles.axis_annotations,'ButtonDownFcn',@axis_click_Callback);
     elseif get(handles.toggle_meanplot,'Value')==get(handles.toggle_meanplot,'Max')
         axes(handles.axis_annotations); cla;
@@ -510,6 +528,20 @@ function update_plots(handles)
         hold off;
     end
     guidata(handles.figure_review,handles);
+end
+
+% ===============================================================================
+
+function update_boxplots(hObject,~)
+    handles = guidata(hObject);
+    cla(handles.axis_summary);
+    axes(handles.axis_summary);
+    a = sprintf('[%02d],',1:size(handles.AllRatings,2));
+    b = strsplit(a,',')';
+    boxplot(handles.AllRatings,b(1:end-1));
+    set(handles.axis_summary,...
+        'YLim',[handles.axis_min,handles.axis_max],...
+        'YTick',linspace(handles.axis_min,handles.axis_max,5));
 end
 
 % ===============================================================================
