@@ -527,6 +527,8 @@ function figure_review_SizeChanged(hObject,~)
         if isfield(handles,'vlc')
             move(handles.vlc,getpixelposition(handles.axis_guide));
         end
+        rel_width = getpixelposition(handles.reliability);
+        handles.reliability.ColumnWidth = {floor(rel_width(3)/2)-1};
     end
 end
 
