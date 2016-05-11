@@ -524,7 +524,7 @@ function update_plots(handles)
         plot(handles.Seconds,handles.MeanRatings,'-','LineWidth',2,'Color',[1 0 0],'ButtonDownFcn',@axis_click_Callback);
         ylim([handles.axis_min,handles.axis_max]);
         xlim([0,ceil(max(handles.Seconds))+1]);
-        set(gca,'YGrid','on','YTick',[handles.axis_min,handles.axis_max-(handles.axis_max-handles.axis_min)/2,handles.axis_max]);
+        set(gca,'YGrid','on','YTick',linspace(handles.axis_min,handles.axis_max,5));
         hold off;
     end
     guidata(handles.figure_review,handles);
