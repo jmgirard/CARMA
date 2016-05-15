@@ -127,7 +127,7 @@ function fig_collect_device
         end
         fwrite(handles.com,[240 125 0 90 0 247]); % send host mode message to digitizer
         fwrite(handles.com,[240 125 0 34 247]); % send reset message to digitizer
-        fwrite(handles.com,[240 125 0 3 0 50 247]); % send interval message to digitizer to set sampling interval to 50 ms 
+        fwrite(handles.com,[240 125 0 3 0 125 247]); % send interval message to digitizer to set sampling interval to 150 ms 
         fwrite(handles.com,[240 125 0 2 64 247]); % send resolution message to digitizer to set sampling resolution to 10-bit
         pause(3); % wait until the digitizer has sent host mode and reset confirmation messages
         try
