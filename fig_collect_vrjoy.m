@@ -42,15 +42,9 @@ function fig_collect_vrjoy
     handles.menu_axisnumbers = uimenu(handles.menu_settings, ...
         'Label','Set Axis Numbers', ...
         'Callback',@menu_axisnumbers_Callback);
-    handles.menu_axiscolors = uimenu(handles.menu_settings, ...
-        'Label','Set Axis Colors', ...
-        'Callback',@menu_binsize_Callback);
-    handles.menu_binsize = uimenu(handles.menu_settings, ...
-        'Label','Set Bin Size', ...
-        'Callback',@menu_binsize_Callback);
-    handles.menu_defaultdir = uimenu(handles.menu_settings, ...
+    handles.menu_workingdir = uimenu(handles.menu_settings, ...
         'Label','Set Default Folder', ...
-        'Callback',@menu_defaultdir_Callback);
+        'Callback',@menu_workingdir_Callback);
     handles.menu_help = uimenu(handles.figure_collect, ...
         'Label','Help');
     handles.menu_about = uimenu(handles.menu_help, ...
@@ -67,7 +61,7 @@ function fig_collect_vrjoy
     % Create uicontrol elements
     handles.axis_info = axes(handles.figure_collect, ...
         'Units','normalized', ...
-        'Position',[.01 .02 .63 .05], ...
+        'Position',[.01 .02 .86 .05], ...
         'XLim',[0,100],'YLim',[0,1], ...
         'XTick',(0:10:100),'TickLength',[0.005 0],'XTickLabel',[], ...
         'Box','on','Layer','top','YTick',[]);
@@ -119,8 +113,8 @@ function fig_collect_vrjoy
     % Create and display custom color gradient in rating axis
     axes(handles.axis_image);
     hold on;
-    image([colorGradient(handles.settings.axis_color3,handles.settings.axis_color2,225,100); ...
-        colorGradient(handles.settings.axis_color2,handles.settings.axis_color1,225,100)]);
+    handles.im = image([colorGradient([0,1,0],[1,1,0],225,100); ...
+        colorGradient([1,1,0],[1,0,0],225,100)]);
     set(handles.axis_image, ...
         'XLim',[0 100],'YLim',[0 450], ...
         'XTick',[],'YTick',[]);
@@ -180,7 +174,7 @@ function menu_openmedia_Callback(hObject,~)
     last_ts_sys = 0;
     handles.vlc.playlist.items.clear();
     % Browse for, load, and get text_duration for a media file
-    [video_name,video_path] = uigetfile({'*.*','All Files (*.*)'},'Select an audio or video file',handles.settings.defaultdir);
+    [video_name,video_path] = uigetfile({'*.*','All Files (*.*)'},'Select an audio or video file',handles.settings.workingdir);
     if video_name==0, return; end
     try
         MRL = fullfile(video_path,video_name);
@@ -331,79 +325,23 @@ end
 
 % ===============================================================================
 
-function menu_binsize_Callback(hObject,~)
+function menu_workingdir_Callback(hObject,~)
     handles = guidata(hObject);
-    settings = handles.settings;
-    d = dialog('Position',[0 0 500 200],'Name','Set Bin Size','Visible','off');
-    movegui(d,'center');
-    set(d,'Visible','on');
-    uicontrol(d, ...
-        'Style','text', ...
-        'Units','Normalized', ...
-        'Position',[.10 .50 .80 .40], ...
-        'String','CARMA samples the joystick at 20 Hz. Samples are then averaged into temporal bins which are output in an annotation file. Bin size determines how long each bin is and thus how many samples contribute to it. Select a bin size below:');
-    popup_bin = uicontrol(d, ...
-        'Style','popup', ...
-        'Units','Normalized', ...
-        'Position',[.10 .35 .80 .20], ...
-        'String',{'0.25 sec (each bin averages 5 samples)','0.50 sec (each bin averages 10 samples)','1.00 sec (each bin averages 20 samples)','2.00 sec (each bin averages 40 samples)','4.00 sec (each bin averages 80 samples)'}, ...
-        'Value',settings.binsizeval);
-    uicontrol(d, ...
-        'Style','pushbutton', ...
-        'Units','Normalized', ...
-        'Position',[.10 .10 .30 .20], ...
-        'String','Save as Default', ...
-        'Callback',@push_save_Callback);
-    uicontrol(d, ...
-        'Style','pushbutton', ...
-        'Units','Normalized', ...
-        'Position',[.60 .10 .30 .20], ...
-        'String','Apply this Session', ...
-        'Callback',@push_apply_Callback);
-    stop(handles.timer);
-    uiwait(d);
-    handles.settings = settings;
-    guidata(handles.figure_collect,handles);
-    start(handles.timer);
-    function push_save_Callback(~,~)
-        binsizeval = popup_bin.Value;
-        binsizenum = popup_bin.String{binsizeval};
-        binsizenum = str2double(binsizenum(1,1:4));
-        settings.binsizeval = binsizeval;
-        settings.binsizenum = binsizenum;
-        if isdeployed
-            save(fullfile(ctfroot,'CARMA','default.mat'),'settings');
-        else
-            save('default.mat','settings');
-        end
-        delete(d);
-        msgbox(sprintf('Saved the current settings as the default settings.\nNext time CARMA is opened, these settings will be used.'));
-    end
-    function push_apply_Callback(~,~)
-        binsizeval = popup_bin.Value;
-        binsizenum = popup_bin.String{binsizeval};
-        binsizenum = str2double(binsizenum(1,1:4));
-        settings.binsizeval = binsizeval;
-        settings.binsizenum = binsizenum;
-        delete(d);
-        msgbox(sprintf('Applied the current settings for the current session.\nNext time CARMA is opened, these settings will be lost.'));
-    end
-end
-
-% ===============================================================================
-
-function menu_defaultdir_Callback(hObject,~)
-    handles = guidata(hObject);
-    settings = handles.settings;
-    path = uigetdir(settings.defaultdir,'Select a new default folder:');
+    path = uigetdir(settings.workingdir,'Select a new working folder:');
     if isequal(path,0), return; end
-    settings.defaultdir = path;
-    if isdeployed
-        save(fullfile(ctfroot,'CARMA','default.mat'),'settings');
-    else
-        save('default.mat','settings');
+    answer2 = questdlg('How long should these changes apply?','','This Session Only','Save as Default','This Session Only');
+    switch answer2
+        case 'This Session Only'
+            handles.settings.workingdir = path;
+        case 'Save as Default'
+            handles.settings.workingdir = path;
+            settings = handles.settings;
+            if isdeployed
+                save(fullfile(ctfroot,'CARMA','default.mat'),'settings');
+            else
+                save('default.mat','settings');
+            end
     end
-    handles.settings = settings;
     guidata(handles.figure_collect,handles);
 end
 
@@ -517,10 +455,11 @@ function timer_Callback(~,~,handles)
         set(handles.plot_line,'XData',[0 100],'YData',[val val]);
         set(handles.plot_marker,'XData',50,'YData',val,'MarkerFaceColor','red');
         ratings = [ratings; ts_vlc, val];
+        set(handles.text_timestamp,'String',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
         frac = (ts_vlc / handles.dur) * 100;
         set(handles.timebar,'Position',[0 0 frac 1]);
-        set(handles.text_timestamp,'String',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
         drawnow();
+        guidata(handles.figure_collect,handles);
     % After playing
     elseif handles.vlc.input.state == 5 || handles.vlc.input.state == 6
         recording = 0;
@@ -529,7 +468,7 @@ function timer_Callback(~,~,handles)
         % Average ratings per second of playback
         rating = ratings;
         disp(rating);
-        anchors = [0,(handles.settings.binsizenum:handles.settings.binsizenum:floor(handles.dur))];
+        anchors = [0,(0.25:0.25:floor(handles.dur))];
         mean_ratings = nan(length(anchors)-1,2);
         mean_ratings(:,1) = anchors(2:end)';
         for i = 1:length(anchors)-1
@@ -542,7 +481,7 @@ function timer_Callback(~,~,handles)
         end
         % Prompt user to save the collected annotations
         [~,defaultname,ext] = fileparts(handles.MRL);
-        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',fullfile(handles.settings.defaultdir,defaultname));
+        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',fullfile(handles.settings.workingdir,defaultname));
         if ~isequal(filename,0) && ~isequal(pathname,0)
             % Add metadata to mean ratings and timestamps
             output = [ ...
