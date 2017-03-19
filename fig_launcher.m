@@ -33,7 +33,7 @@ function fig_launcher
         'Position',[0.05 0.10 0.425 0.40], ...
         'String','Collect Ratings', ...
         'FontSize',18, ...
-        'Callback','fig_collect()');
+        'Callback',@device);
     handles.push_review = uicontrol('Style','pushbutton', ...
         'Parent',handles.figure_launcher, ...
         'Units','Normalized', ...
@@ -71,6 +71,33 @@ function fig_launcher
             end
         end
     catch
+    end
+end
+
+function device(~,~)
+    % Check for joystick
+    err.message = 'Joystick connected.';
+    try
+        vrjoystick(1);
+    catch err
+    end
+    if strcmp(err.message,'Joystick is not connected.')
+        % If no joystick is detected, default to the mouse version
+        fig_collect_mouse();
+    elseif strcmp(err.message,'Joystick connected.')
+        % If a joystick is detected, ask to use mouse or joystick
+        choice = questdlg('Which input device would you like to use?','CARMA','Mouse','Joystick','Joystick');
+        switch choice
+            case 'Mouse'
+                fig_collect_mouse();
+            case 'Joystick'
+                fig_collect_vrjoy();
+            otherwise
+                return;
+        end
+    else
+        % If some other problem with the joystick is detected, report it
+        errordlg(err.message,'Error');
     end
 end
 
