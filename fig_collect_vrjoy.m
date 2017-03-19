@@ -36,6 +36,15 @@ function fig_collect_vrjoy
         'Callback',@menu_preview_Callback);
     handles.menu_settings = uimenu(handles.figure_collect, ...
         'Label','Settings');
+    handles.menu_axislabels = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Labels', ...
+        'Callback',@menu_axislabels_Callback);
+    handles.menu_axisnumbers = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Numbers', ...
+        'Callback',@menu_axisnumbers_Callback);
+    handles.menu_axiscolors = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Colors', ...
+        'Callback',@menu_binsize_Callback);
     handles.menu_binsize = uimenu(handles.menu_settings, ...
         'Label','Set Bin Size', ...
         'Callback',@menu_binsize_Callback);
@@ -223,6 +232,101 @@ end
 function menu_preview_Callback(hObject,~)
     handles = guidata(hObject);
     winopen(handles.VID);
+end
+
+% ===============================================================================
+
+function menu_axislabels_Callback(hObject,~)
+    handles = guidata(hObject);
+    prompt = {'Enter upper axis label:','Enter lower axis label:'};
+    defaultans = {handles.settings.axis_upper,handles.settings.axis_lower};
+    answer = inputdlg(prompt,'',1,defaultans);
+    if isempty(answer), return; end
+    answer2 = questdlg('How long should these changes apply?','','This Session Only','Save as Default','This Session Only');
+    switch answer2
+        case 'This Session Only'
+            handles.settings.axis_upper = answer{1};
+            handles.settings.axis_lower = answer{2};
+            handles.axis_upper.String = answer{1};
+            handles.axis_lower.String = answer{2};
+            drawnow();
+            msgbox(sprintf('Applied the changes for the current session only.\nNext time CARMA is opened, these settings will be lost.'));
+        case 'Save as Default'
+            handles.settings.axis_upper = answer{1};
+            handles.settings.axis_lower = answer{2};
+            handles.axis_upper.String = answer{1};
+            handles.axis_lower.String = answer{2};
+            drawnow();
+            settings = handles.settings;
+            settings.axis_upper = answer{1};
+            settings.axis_lower = answer{2};
+            if isdeployed
+                save(fullfile(ctfroot,'CARMA','default.mat'),'settings');
+            else
+                save('default.mat','settings');
+            end
+            msgbox(sprintf('Saved the changes as the default settings.\nNext time CARMA is opened, these settings will be used.'));
+        otherwise
+    end
+    guidata(handles.figure_collect,handles);
+end
+
+% ===============================================================================
+
+function menu_axisnumbers_Callback(hObject,~)
+    handles = guidata(hObject);
+    prompt = {'Enter axis maximum value:','Enter axis minimum value:','Enter number of axis steps:'};
+    defaultans = {num2str(handles.settings.axis_max,'%d'),...
+        num2str(handles.settings.axis_min,'%d'),...
+        num2str(handles.settings.axis_steps,'%d')};
+    answer = inputdlg(prompt,'',1,defaultans);
+    if isempty(answer), return; end
+    axis_max = str2double(answer{1});
+    axis_min = str2double(answer{2});
+    axis_steps = str2double(answer{3});
+    if isnan(axis_max) || isnan(axis_min) || isnan(axis_steps)
+        errordlg('The axis numbers settings must be numerical.');
+        return;
+    end
+    if axis_steps<=1 || ceil(axis_steps)~=floor(axis_steps)
+        errordlg('Number of Axis Steps must be a positive integer greater than 1.')
+        return;
+    end
+    if axis_min >= axis_max
+        errordlg('Maximum Value must be greater than Minimum Value.');
+        return;
+    end
+    answer2 = questdlg('How long should these changes apply?','','This Session Only','Save as Default','This Session Only');
+    switch answer2
+        case 'This Session Only'
+            handles.settings.axis_max = axis_max;
+            handles.settings.axis_min = axis_min;
+            handles.settings.axis_steps = axis_steps;
+            set(handles.axis_rating, ...
+                'XLim',[0 100],'XTick',[], ...
+                'YLim',[axis_min,axis_max], ...
+                'YTick',round(linspace(axis_min,axis_max,axis_steps),2), ...
+                'Box','on','Layer','top','Color','none');
+            drawnow();
+        case 'Save as Default'
+            handles.settings.axis_max = axis_max;
+            handles.settings.axis_min = axis_min;
+            handles.settings.axis_step = axis_steps;
+            set(handles.axis_rating, ...
+                'XLim',[0 100],'XTick',[], ...
+                'YLim',[axis_min,axis_max], ...
+                'YTick',round(linspace(axis_min,axis_max,axis_steps),2), ...
+                'Box','on','Layer','top','Color','none');
+            drawnow();
+            settings = handles.settings;
+            if isdeployed
+                save(fullfile(ctfroot,'CARMA','default.mat'),'settings');
+            else
+                save('default.mat','settings');
+            end
+        otherwise
+    end
+    guidata(handles.figure_collect,handles);
 end
 
 % ===============================================================================
