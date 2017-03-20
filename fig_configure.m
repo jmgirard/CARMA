@@ -3,6 +3,7 @@ function fig_configure
 %   License: https://carma.codeplex.com/license
 
     global settings;
+    load('default.mat')
     % Create and maximize annotation window
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_configure = figure( ...
