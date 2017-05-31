@@ -23,6 +23,7 @@ function fig_collect_device
     % Set minimum size
     set(handles.figure_collect,'Units','normalized','Position',[0.1,0.1,0.8,0.8],'Visible','on');
     drawnow;
+    warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
     jFig = get(handle(handles.figure_collect),'JavaFrame');
     jClient = jFig.fHG2Client;
     jWindow = jClient.getWindow;
