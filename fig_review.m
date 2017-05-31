@@ -74,6 +74,10 @@ function fig_review
         'XLim',[0,10],'Box','on', ...
         'PickableParts','none', ...
         'ButtonDownFcn',@axis_click_Callback);
+    global tsline;
+    hold on;
+    tsline = plot(handles.axis_annotations,[0,0],[-100,100],'k');
+    hold off;
     handles.listbox = uicontrol('Style','listbox', ...
         'Parent',handles.figure_review, ...
         'Units','normalized', ...
@@ -179,7 +183,7 @@ function menu_multimedia_Callback(hObject,~)
         handles.vlc.playlist.togglePause();
         handles.vlc.input.time = 0;
         handles.dur = handles.vlc.input.length / 1000;
-        set(handles.axis_annotations,'XLim',[1,handles.dur],'PickableParts','visible');
+        set(handles.axis_annotations,'XLim',[0,ceil(handles.dur)+1],'PickableParts','visible');
         set(handles.toggle_playpause,'Enable','on');
     catch err
         msgbox(err.message,'Error loading multimedia file.'); return;
@@ -464,13 +468,13 @@ end
 % ===============================================================================
 
 function timer2_Callback(~,~,handles)
-    global tsl;
+    global tsline;
     handles = guidata(handles.figure_review);
     if handles.vlc.input.state == 3
         % While playing, update annotations plot
         ts = handles.vlc.input.time/1000;
-        update_plots(handles);
-        set(tsl,'XData',[ts,ts]);
+        %update_plots(handles);
+        set(tsline,'XData',[ts,ts]);
         drawnow();
     elseif handles.vlc.input.state == 6 || handles.vlc.input.state == 5
         % When done, send stop() command to VLC
@@ -488,7 +492,7 @@ end
 % ===============================================================================
 
 function axis_click_Callback(hObject,~)
-    global tsl;
+    global tsline;
     handles = guidata(hObject);
     % Jump VLC playback to clicked position
     coord = get(handles.axis_annotations,'CurrentPoint');
@@ -504,14 +508,14 @@ function axis_click_Callback(hObject,~)
     % While playing, update annotations plot
     ts = handles.vlc.input.time/1000;
     update_plots(handles);
-    set(tsl,'XData',[ts,ts]);
+    set(tsline,'XData',[ts,ts]);
     drawnow();
 end
 
 % ===============================================================================
 
 function update_plots(handles)
-global tsl;
+    global tsline;
     handles = guidata(handles.figure_review);
     if isempty(handles.AllRatings), return; end
     if get(handles.toggle_meanplot,'Value')==get(handles.toggle_meanplot,'Min')
@@ -520,7 +524,9 @@ global tsl;
         ylim([handles.axis_min,handles.axis_max]);
         xlim([0,ceil(max(handles.Seconds))+1]);
         set(gca,'YGrid','on','YTick',linspace(handles.axis_min,handles.axis_max,5));
-        tsl = plot(handles.axis_X,[0,0],[handles.axis_min,handles.axis_max],'k');
+        hold on;
+        tsline = plot(handles.axis_annotations,[0,0],[handles.axis_min,handles.axis_max],'k');
+        hold off;
         set(handles.axis_annotations,'ButtonDownFcn',@axis_click_Callback);
     elseif get(handles.toggle_meanplot,'Value')==get(handles.toggle_meanplot,'Max')
         axes(handles.axis_annotations); cla;
@@ -530,8 +536,8 @@ global tsl;
         plot(handles.Seconds,handles.MeanRatings,'-','LineWidth',2,'Color',[1 0 0],'ButtonDownFcn',@axis_click_Callback);
         ylim([handles.axis_min,handles.axis_max]);
         xlim([0,ceil(max(handles.Seconds))+1]);
-        tsl = plot(handles.axis_X,[0,0],[handles.axis_min,handles.axis_max],'k');
-        set(gca,'YGrid','on','YTick',[handles.axis_min,handles.axis_max-(handles.axis_max-handles.axis_min)/2,handles.axis_max]);
+        tsline = plot(handles.axis_annotations,[0,0],[handles.axis_min,handles.axis_max],'k');
+        set(gca,'YGrid','on','YTick',linspace(handles.axis_min,handles.axis_max,5));
         hold off;
     end
     guidata(handles.figure_review,handles);
