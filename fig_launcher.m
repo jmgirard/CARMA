@@ -2,9 +2,8 @@ function fig_launcher
 %FIG_LAUNCHER Window to launch the other windows
 % License: https://carma.codeplex.com/license
 
-    global version;
-    version = 14.00;
     % Create and center main window
+	version = 13.01;
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_launcher = figure( ...
         'Units','pixels', ...
@@ -16,34 +15,49 @@ function fig_launcher
         'Visible','off', ...
         'Color',defaultBackground);
     movegui(handles.figure_launcher,'center');
+    set(handles.figure_launcher,'Visible','on');
     % Create UI elements
-    handles.axis_title = axes(handles.figure_launcher, ...
+    handles.axis_title = axes(handles.figure_launcher,...
         'Units','normalized', ...
         'Position',[0.05 0.60 0.90 0.30], ...
-        'Color',[0.2 0.2 0.2], ...
-        'Box','on','XTick',[],'YTick',[], ...
+        'Color',[0.2 0.2 0.2],...
+        'Box','on','XTick',[],'YTick',[],...
         'ButtonDownFcn',@website);
     xlim([-1 1]); ylim([-1 1]);
-    text(0,0,sprintf('CARMA v%.2f',version),'Color',[1 1 1],'FontSize',42, ...
+    text(0,0,sprintf('CARMA v%.2f',version),'Color',[1 1 1],'FontSize',42,...
         'FontName','cambria','HorizontalAlignment','center',...
         'ButtonDownFcn',@website);
     handles.push_collect = uicontrol(handles.figure_launcher, ...
-        'Style','pushbutton', ...
+		'Style','pushbutton', ...
         'Units','Normalized', ...
-        'Position',[0.05 0.10 0.425 0.40], ...
-        'String','Collect Ratings', ...
+        'Position',[0.05 0.10 0.25 0.40], ...
+        'String','Collect', ...
         'FontSize',18, ...
-        'Callback',@device);
-    handles.push_review = uicontrol('Style','pushbutton', ...
-        'Parent',handles.figure_launcher, ...
+        'Callback',@push_collect_Callback);
+    handles.push_review = uicontrol(handles.figure_launcher, ...
+		'Style','pushbutton', ...
         'Units','Normalized', ...
-        'Position',[0.525 0.10 0.425 0.40], ...
-        'String','Review Ratings', ...
+        'Position',[0.05 0.10 0.25 0.40], ...
+        'String','Review', ...
         'FontSize',18, ...
-        'Callback','fig_review()');
-    set(handles.figure_launcher,'Visible','on');
+        'Callback',@push_review_Callback);
+    handles.push_configure = uicontrol(handles.figure_launcher, ...
+		'Style','pushbutton', ...
+        'Units','Normalized', ...
+        'Position',[0.70 0.10 0.25 0.40], ...
+        'String','Configure', ...
+        'FontSize',18, ...
+        'Callback',@push_configure_Callback);
+    align([handles.push_collect,handles.push_review,handles.push_configure],'distribute','bottom');
     guidata(handles.figure_launcher,handles);
-    addpath('Functions');  
+	addpath('Functions');
+    % Configure default settings
+    global settings;
+    if isdeployed
+        settings = importdata(fullfile(ctfroot,'CARMA','default.mat'));
+    else
+        settings = importdata('default.mat');
+    end
     % Check that VLC is installed
     axctl = actxcontrollist;
     index = strcmp(axctl(:,2),'VideoLAN.VLCPlugin.2');
@@ -54,51 +68,42 @@ function fig_launcher
             case 'Yes'
                 web('http://www.videolan.org/vlc/download-windows.html','-browser');
         end
+        delete(handles.figure_launcher);
     end
     % Check for updates
     try
         rss = urlread('http://carma.codeplex.com/project/feeds/rss?ProjectRSSFeed=codeplex%3a%2f%2frelease%2fcarma');
         index = strfind(rss,'CARMA v');
         newest = str2double(rss(index(1)+7:index(1)+11));
-        current = version;
-        if current < newest
+        if version < newest
             choice = questdlg(sprintf('CARMA has detected that an update is available.\nOpen download page?'),...
                 'CARMA','Yes','No','Yes');
             switch choice
                 case 'Yes'
                     web('http://carma.codeplex.com/releases/','-browser');
-                    delete(handles.figure_launcher);
             end
+            delete(handles.figure_launcher);
         end
     catch
     end
 end
 
-function device(~,~)
-    % Check for joystick
-    err.message = 'Joystick connected.';
-    try
-        vrjoystick(1);
-    catch err
+function push_collect_Callback(~,~)
+    global settings;
+    if strcmp(settings.input,'Computer Mouse')
+        fig_collect_mouse;
+    elseif strcmp(settings.input,'USB Joystick')
+        fig_collect_device;
     end
-    if strcmp(err.message,'Joystick is not connected.')
-        % If no joystick is detected, default to the mouse version
-        fig_collect_mouse();
-    elseif strcmp(err.message,'Joystick connected.')
-        % If a joystick is detected, ask to use mouse or joystick
-        choice = questdlg('Which input device would you like to use?','CARMA','Mouse','Joystick','Joystick');
-        switch choice
-            case 'Mouse'
-                fig_collect_mouse();
-            case 'Joystick'
-                fig_collect_vrjoy();
-            otherwise
-                return;
-        end
-    else
-        % If some other problem with the joystick is detected, report it
-        errordlg(err.message,'Error');
-    end
+end
+
+function push_review_Callback(~,~)
+    fig_review;
+end
+
+function push_configure_Callback(~,~)
+    fig_configure();
+    uiwait(findobj('Name','CARMA: Configure'));
 end
 
 function website(~,~)

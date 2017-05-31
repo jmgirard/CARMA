@@ -6,15 +6,13 @@ function fig_review
     addpath('Functions');
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_review = figure( ...
-        'Units','normalized', ...
-        'Position',[0.1 0.1 0.8 0.8], ...
         'Name','CARMA: Review', ...
         'NumberTitle','off', ...
         'MenuBar','none', ...
         'ToolBar','none', ...
         'Visible','off', ...
         'Color',defaultBackground, ...
-        'SizeChangedFcn',@figure_review_SizeChanged, ...
+        'ResizeFcn',@figure_review_Resize, ...
         'CloseRequestFcn',@figure_review_CloseRequest);
     %Create menu bar elements
     handles.menu_multimedia = uimenu(handles.figure_review, ...
@@ -54,17 +52,27 @@ function fig_review
         'Parent',handles.menu_stats, ...
         'Label','Consistency ICC', ...
         'Callback',@menu_consist_Callback);
-    pause(0.1);
+    % Set minimum size
+    set(handles.figure_review,'Units','normalized','Position',[0.1,0.1,0.8,0.8],'Visible','on');
+    drawnow;
+    jFig = get(handle(handles.figure_review),'JavaFrame');
+    jClient = jFig.fHG2Client;
+    jWindow = jClient.getWindow;
+    jWindow.setMinimumSize(java.awt.Dimension(1024,768));
     %Create uicontrol elements
     lc = .01; rc = .89;
+    handles.axis_min = -100;
+    handles.axis_max = 100;
     handles.axis_annotations = axes(...
         'Parent',handles.figure_review, ...
         'Units','Normalized', ...
         'OuterPosition',[0 0 1 1], ...
         'Position',[lc+.02 .04+.01 .87-.02 .35-.01], ...
         'TickLength',[0.01 0], ...
-        'YLim',[-100,100],'YTick',[-100,-50,0,50,100],'YGrid','on',...
-        'XLim',[0,10],'XTick',(1:10),'Box','on', ...
+        'YLim',[handles.axis_min,handles.axis_max], ...
+        'YTick',linspace(handles.axis_min,handles.axis_max,5),'YGrid','on',...
+        'XLim',[0,10],'Box','on', ...
+        'PickableParts','none', ...
         'ButtonDownFcn',@axis_click_Callback);
     handles.listbox = uicontrol('Style','listbox', ...
         'Parent',handles.figure_review, ...
@@ -139,8 +147,6 @@ function fig_review
     handles.AllFilenames = cell(0,1);
     handles.AllRatings = zeros(0,1);
     handles.MeanRatings = zeros(0,1);
-    handles.axis_min = zeros(0,1);
-    handles.axis_max = zeros(0,1);
     % Create timer
 	handles.timer2 = timer(...
         'ExecutionMode','fixedRate', ...
@@ -173,7 +179,7 @@ function menu_multimedia_Callback(hObject,~)
         handles.vlc.playlist.togglePause();
         handles.vlc.input.time = 0;
         handles.dur = handles.vlc.input.length / 1000;
-        set(handles.axis_annotations,'PickableParts','visible');
+        set(handles.axis_annotations,'XLim',[1,handles.dur],'PickableParts','visible');
         set(handles.toggle_playpause,'Enable','on');
     catch err
         msgbox(err.message,'Error loading multimedia file.'); return;
@@ -458,14 +464,13 @@ end
 % ===============================================================================
 
 function timer2_Callback(~,~,handles)
+    global tsl;
     handles = guidata(handles.figure_review);
     if handles.vlc.input.state == 3
         % While playing, update annotations plot
         ts = handles.vlc.input.time/1000;
         update_plots(handles);
-        hold on;
-        plot(handles.axis_annotations,[ts,ts],[handles.axis_min,handles.axis_max],'k');
-        hold off;
+        set(tsl,'XData',[ts,ts]);
         drawnow();
     elseif handles.vlc.input.state == 6 || handles.vlc.input.state == 5
         % When done, send stop() command to VLC
@@ -483,6 +488,7 @@ end
 % ===============================================================================
 
 function axis_click_Callback(hObject,~)
+    global tsl;
     handles = guidata(hObject);
     % Jump VLC playback to clicked position
     coord = get(handles.axis_annotations,'CurrentPoint');
@@ -498,15 +504,14 @@ function axis_click_Callback(hObject,~)
     % While playing, update annotations plot
     ts = handles.vlc.input.time/1000;
     update_plots(handles);
-    hold on;
-    plot(handles.axis_annotations,[ts,ts],[handles.axis_min,handles.axis_max],'k');
-    hold off;
+    set(tsl,'XData',[ts,ts]);
     drawnow();
 end
 
 % ===============================================================================
 
 function update_plots(handles)
+global tsl;
     handles = guidata(handles.figure_review);
     if isempty(handles.AllRatings), return; end
     if get(handles.toggle_meanplot,'Value')==get(handles.toggle_meanplot,'Min')
@@ -515,6 +520,7 @@ function update_plots(handles)
         ylim([handles.axis_min,handles.axis_max]);
         xlim([0,ceil(max(handles.Seconds))+1]);
         set(gca,'YGrid','on','YTick',linspace(handles.axis_min,handles.axis_max,5));
+        tsl = plot(handles.axis_X,[0,0],[handles.axis_min,handles.axis_max],'k');
         set(handles.axis_annotations,'ButtonDownFcn',@axis_click_Callback);
     elseif get(handles.toggle_meanplot,'Value')==get(handles.toggle_meanplot,'Max')
         axes(handles.axis_annotations); cla;
@@ -524,7 +530,8 @@ function update_plots(handles)
         plot(handles.Seconds,handles.MeanRatings,'-','LineWidth',2,'Color',[1 0 0],'ButtonDownFcn',@axis_click_Callback);
         ylim([handles.axis_min,handles.axis_max]);
         xlim([0,ceil(max(handles.Seconds))+1]);
-        set(gca,'YGrid','on','YTick',linspace(handles.axis_min,handles.axis_max,5));
+        tsl = plot(handles.axis_X,[0,0],[handles.axis_min,handles.axis_max],'k');
+        set(gca,'YGrid','on','YTick',[handles.axis_min,handles.axis_max-(handles.axis_max-handles.axis_min)/2,handles.axis_max]);
         hold off;
     end
     guidata(handles.figure_review,handles);
@@ -546,19 +553,11 @@ end
 
 % ===============================================================================
 
-function figure_review_SizeChanged(hObject,~)
+function figure_review_Resize(hObject,~)
     handles = guidata(hObject);
-    if isfield(handles,'figure_review')
-        pos = getpixelposition(handles.figure_review);
-        % Force to remain above a minimum size
-        if pos(3) < 1024 || pos(4) < 600
-            setpixelposition(handles.figure_review,[pos(1) pos(2) 1024 600]);
-            movegui(handles.figure_review,'center');
-        end
+    if isfield(handles,'figure_review') && isfield(handles,'vlc')
         % Update the size and position of the VLC controller
-        if isfield(handles,'vlc')
-            move(handles.vlc,getpixelposition(handles.axis_guide));
-        end
+        move(handles.vlc,getpixelposition(handles.axis_guide));
         rel_width = getpixelposition(handles.reliability);
         handles.reliability.ColumnWidth = {floor(rel_width(3)/2)-1};
     end
@@ -568,7 +567,9 @@ end
 
 function figure_review_CloseRequest(hObject,~)
     handles = guidata(hObject);
+    delete(handles.vlc);
     % Remove timer as part of cleanup
+    stop(handles.timer2);
     delete(handles.timer2);
     delete(gcf);
 end
