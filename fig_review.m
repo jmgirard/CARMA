@@ -1,6 +1,6 @@
 function fig_review
 %FIG_REVIEW Window for the review of existing ratings
-% License: https://carma.codeplex.com/license
+% License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
     % Create and maximize annotation window
     addpath('Functions');

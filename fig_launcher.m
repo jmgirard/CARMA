@@ -1,9 +1,10 @@
 function fig_launcher
 %FIG_LAUNCHER Window to launch the other windows
-% License: https://carma.codeplex.com/license
+% License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
+    global version;
+	version = 14.00;
     % Create and center main window
-	version = 13.01;
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_launcher = figure( ...
         'Units','pixels', ...
@@ -15,7 +16,6 @@ function fig_launcher
         'Visible','off', ...
         'Color',defaultBackground);
     movegui(handles.figure_launcher,'center');
-    set(handles.figure_launcher,'Visible','on');
     % Create UI elements
     handles.axis_title = axes(handles.figure_launcher,...
         'Units','normalized', ...
@@ -40,7 +40,7 @@ function fig_launcher
         'Position',[0.05 0.10 0.25 0.40], ...
         'String','Review', ...
         'FontSize',18, ...
-        'Callback',@push_review_Callback);
+        'Callback','fig_review()');
     handles.push_configure = uicontrol(handles.figure_launcher, ...
 		'Style','pushbutton', ...
         'Units','Normalized', ...
@@ -49,6 +49,7 @@ function fig_launcher
         'FontSize',18, ...
         'Callback',@push_configure_Callback);
     align([handles.push_collect,handles.push_review,handles.push_configure],'distribute','bottom');
+    set(handles.figure_launcher,'Visible','on');
     guidata(handles.figure_launcher,handles);
 	addpath('Functions');
     % Configure default settings
@@ -68,21 +69,21 @@ function fig_launcher
             case 'Yes'
                 web('http://www.videolan.org/vlc/download-windows.html','-browser');
         end
-        delete(handles.figure_launcher);
     end
     % Check for updates
     try
-        rss = urlread('http://carma.codeplex.com/project/feeds/rss?ProjectRSSFeed=codeplex%3a%2f%2frelease%2fcarma');
+        rss = urlread('https://github.com/jmgirard/CARMA/releases');
         index = strfind(rss,'CARMA v');
-        newest = str2double(rss(index(1)+7:index(1)+11));
-        if version < newest
+        newest = str2double(rss(index(1)+7:index(1)+10));
+        current = version;
+        if current < newest
             choice = questdlg(sprintf('CARMA has detected that an update is available.\nOpen download page?'),...
                 'CARMA','Yes','No','Yes');
             switch choice
                 case 'Yes'
-                    web('http://carma.codeplex.com/releases/','-browser');
+                    web('https://github.com/jmgirard/CARMA/releases/','-browser');
+                    delete(handles.figure_launcher);
             end
-            delete(handles.figure_launcher);
         end
     catch
     end
@@ -97,10 +98,6 @@ function push_collect_Callback(~,~)
     end
 end
 
-function push_review_Callback(~,~)
-    fig_review;
-end
-
 function push_configure_Callback(~,~)
     fig_configure();
     uiwait(findobj('Name','CARMA: Configure'));
@@ -110,7 +107,7 @@ function website(~,~)
     choice = questdlg('Open CARMA website in browser?','CARMA','Yes','No','Yes');
     switch choice
         case 'Yes'
-            web('http://carma.codeplex.com/','-browser');
+            web('http://carma.jmgirard.com/','-browser');
         otherwise
             return;
     end
