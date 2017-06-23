@@ -52,13 +52,6 @@ function fig_launcher
     set(handles.figure_launcher,'Visible','on');
     guidata(handles.figure_launcher,handles);
 	addpath('Functions');
-    % Configure default settings
-    global settings;
-    if isdeployed
-        settings = importdata(fullfile(ctfroot,'CARMA','default.mat'));
-    else
-        settings = importdata('default.mat');
-    end
     % Check that VLC is installed
     axctl = actxcontrollist;
     index = strcmp(axctl(:,2),'VideoLAN.VLCPlugin.2');
@@ -90,11 +83,28 @@ function fig_launcher
 end
 
 function push_collect_Callback(~,~)
-    global settings;
-    if strcmp(settings.input,'Computer Mouse')
-        fig_collect_mouse;
-    elseif strcmp(settings.input,'USB Joystick')
-        fig_collect_device;
+    err.message = 'Joystick connected.';
+    try
+        vrjoystick(1);
+    catch err
+    end
+    if strcmp(err.message,'Joystick is not connected.')
+        % If no joystick is detected, default to the mouse version
+        fig_collect_mouse();
+    elseif strcmp(err.message,'Joystick connected.')
+        % If a joystick is detected, ask to use mouse or joystick
+        choice = questdlg('Which input device would you like to use?','CARMA','Mouse','Joystick','Joystick');
+        switch choice
+            case 'Mouse'
+                fig_collect_mouse();
+            case 'Joystick'
+                fig_collect_vrjoy();
+            otherwise
+                return;
+        end
+    else
+        % If some other problem with the joystick is detected, report it
+        errordlg(err.message,'Error');
     end
 end
 

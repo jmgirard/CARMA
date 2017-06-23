@@ -1,6 +1,6 @@
 function fig_configure
 %FIG_CONFIGURE Window for the configuration of settings
-%   License: https://carma.codeplex.com/license
+%   License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
     global settings;
     % Create and maximize annotation window

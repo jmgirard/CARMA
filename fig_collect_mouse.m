@@ -1,6 +1,6 @@
 function fig_collect_mouse
 %FIG_COLLECT_MOUSE Window for the collection of ratings using the mouse
-% License: https://carma.codeplex.com/license
+% License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
     % Create and center main window
     addpath('Functions');
