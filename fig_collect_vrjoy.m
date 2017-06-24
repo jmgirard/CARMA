@@ -3,11 +3,13 @@ function fig_collect_vrjoy
 % License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
     % Get default settings
-    if isdeployed
-        handles.settings = importdata(fullfile(ctfroot,'CARMA','default.mat'));
-    else
-        handles.settings = importdata('default.mat');
+    pExist = ispref('carma');
+    if ~pExist
+        addpref('carma', ...
+            {'labLower','labUpper','axMin','axMax','axSteps','defdir','srate','bsize'}, ...
+            {'Negative Affect','Positive Affect',-100,100,9,'','20','0.50'});
     end
+    handles.settings = getpref('carma');
     % Create and center main window
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_collect = figure( ...
@@ -37,6 +39,23 @@ function fig_collect_vrjoy
         'Label','Close Media File', ...
         'Enable','off', ...
         'Callback',@menu_closemedia_Callback);
+    handles.menu_settings = uimenu(handles.figure_collect, ...
+        'Label','Settings');
+    handles.menu_axislab = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Labels', ...
+        'Callback',@menu_axislab_Callback);
+    handles.menu_axisnum = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Numbers', ...
+        'Callback',@menu_axisnum_Callback);
+    handles.menu_samplerate = uimenu(handles.menu_settings, ...
+        'Label','Set Sampling Rate', ...
+        'Callback',@menu_srate_Callback);
+    handles.menu_binsize = uimenu(handles.menu_settings, ...
+        'Label','Set Bin Size', ...
+        'Callback',@menu_binsize_Callback);
+    handles.menu_defaultdir = uimenu(handles.menu_settings, ...
+        'Label','Set Default Folder', ...
+        'Callback',@menu_defaultdir_Callback);
     handles.menu_help = uimenu(handles.figure_collect, ...
         'Label','Help');
     handles.menu_about = uimenu(handles.menu_help, ...
@@ -89,7 +108,7 @@ function fig_collect_vrjoy
     handles.text_lower = uicontrol(handles.figure_collect, ...
         'Style','text', ...
         'Units','Normalized', ...
-        'Position',[.88 .09 .11 .03], ...
+        'Position',[.88 .09 .11 .02], ...
         'FontSize',10.0, ...
         'FontWeight','bold', ...
         'BackgroundColor',defaultBackground);
@@ -102,24 +121,24 @@ function fig_collect_vrjoy
     handles.axis_guide = axes(handles.figure_collect, ...
         'Units','Normalized', ...
         'Position',[.01 .09 .86 .89], ...
-        'Box','on','XTick',[],'YTick',[],'Color','b');
+        'Box','on','XTick',[],'YTick',[],'Color','k');
     % Update axis labels and slider parameters
-    set(handles.text_lower,'String',handles.settings.axis_lower);
-    set(handles.text_upper,'String',handles.settings.axis_upper);
+    set(handles.text_lower,'String',handles.settings.labLower);
+    set(handles.text_upper,'String',handles.settings.labUpper);
     % Plot current value indicator on rating axis
-    axis_min = handles.settings.axis_min;
-    axis_max = handles.settings.axis_max;
-    axis_range = axis_max - axis_min;
-    midpoint = axis_min + axis_range/2;
+    axMin = handles.settings.axMin;
+    axMax = handles.settings.axMax;
+    axRange = axMax - axMin;
+    axMidpt = axMin + axRange/2;
     axes(handles.axis_rating);
     hold on;
-    handles.plot_patch = patch([0 100 100 0],[axis_min axis_min axis_max axis_max],[1 1 2 2]);
-    handles.plot_line = plot(handles.axis_rating,[0 100],[midpoint midpoint],'-k','LineWidth',5);
-    handles.plot_marker = plot(handles.axis_rating,50,midpoint,'kd','LineWidth',2,'MarkerEdgeColor','k','MarkerFaceColor','w','MarkerSize',25);
+    handles.plot_patch = patch([0 100 100 0],[axMin axMin axMax axMax],[1 1 2 2]);
+    handles.plot_line = plot(handles.axis_rating,[0 100],[axMidpt axMidpt],'-k','LineWidth',5);
+    handles.plot_marker = plot(handles.axis_rating,50,axMidpt,'kd','LineWidth',2,'MarkerEdgeColor','k','MarkerFaceColor','w','MarkerSize',25);
     set(handles.axis_rating, ...
         'XLim',[0 100],'XTick',[], ...
-        'YLim',[axis_min axis_max], ...
-        'YTick',round(linspace(axis_min,axis_max,handles.settings.axis_steps),2), ...
+        'YLim',[axMin axMax], ...
+        'YTick',round(linspace(axMin,axMax,handles.settings.axSteps),2), ...
         'Box','on','Layer','top','Color','w');
     hold off;
     li = get(handles.axis_rating,'LooseInset');
@@ -140,9 +159,10 @@ function fig_collect_vrjoy
         return;
     end
     % Create timer
+    sratenum = str2double(handles.settings.srate);
     handles.timer = timer(...
         'ExecutionMode','fixedRate', ...
-        'Period',0.05, ...
+        'Period',round(1/sratenum,3), ...
         'TimerFcn',{@timer_Callback,handles}, ...
         'ErrorFcn',{@timer_ErrorFcn,handles});
     % Start system clock to improve VLC time stamp precision
@@ -167,7 +187,7 @@ function menu_openmedia_Callback(hObject,~)
     last_ts_sys = 0;
     handles.vlc.playlist.items.clear();
     % Browse for, load, and get text_duration for a media file
-    [video_name,video_path] = uigetfile({'*.*','All Files (*.*)'},'Select an audio or video file',handles.settings.defaultdir);
+    [video_name,video_path] = uigetfile({'*.*','All Files (*.*)'},'Select an audio or video file',handles.settings.defdir);
     if video_name==0, return; end
     try
         MRL = fullfile(video_path,video_name);
@@ -238,6 +258,111 @@ function menu_closemedia_Callback(hObject,~)
     guidata(handles.figure_collect,handles);
 end
 
+% ===============================================================================
+
+function menu_axislab_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    prompt = {'Upper axis label:','Lower axis label:'};
+    defaultans = {settings.labUpper,settings.labLower};
+    labels = inputdlg(prompt,'Set Axis Labels',1,defaultans);
+    if ~isempty(labels)
+        settings.labUpper = labels{1};
+        settings.labLower = labels{2};
+        set(handles.text_upper,'String',settings.labUpper);
+        set(handles.text_lower,'String',settings.labLower);
+        setpref('carma','labUpper',settings.labUpper);
+        setpref('carma','labLower',settings.labLower);
+        handles.settings = settings;
+        guidata(handles.figure_collect,handles);
+    end
+end
+
+% ===============================================================================
+
+function menu_axisnum_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    prompt = {'Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:'};
+    defaultans = {num2str(settings.axMin),num2str(settings.axMax),num2str(settings.axSteps)};
+    numbers = inputdlg(prompt,'Set Axis Numbers',1,defaultans);
+    if ~isempty(numbers)
+        settings.axMin = str2double(numbers{1});
+        settings.axMax = str2double(numbers{2});
+        settings.axSteps = str2double(numbers{3});
+        set(handles.axis_rating, ...
+            'YLim',[settings.axMin,settings.axMax], ...
+            'YTick',round(linspace(settings.axMin,settings.axMax,settings.axSteps),2));
+        set(handles.plot_patch,'YData',[settings.axMin settings.axMin settings.axMax settings.axMax]);
+        setpref('carma','axMin',settings.axMin);
+        setpref('carma','axMax',settings.axMax);
+        setpref('carma','axSteps',settings.axSteps);
+        handles.settings = settings;
+        guidata(handles.figure_collect,handles);
+    end
+end
+
+% ===============================================================================
+
+function menu_srate_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    [srate,checked] = uigetpref( ...
+        'collect','bsize', ...
+        'Select a Bin Size', ...
+        {'CARMA can sample the joystick at different frequencies.';'Higher frequencies provide more data redundancy but also impose a larger computational load.';'Higher sampling rates are recommended for faster computers.'}, ...
+        {'10','20','30';'10 Hz','20 Hz','30 Hz'}, ...
+        'ExtraOptions',{'Cancel'}, ...
+        'CheckboxString','Save as default setting');
+    uisetpref('clearall');
+    if ~strcmpi(srate,'cancel')
+        sratenum = str2double(srate(1,1:2));
+        settings.srate = srate;
+        set(handles.timer,'Period',round(1/sratenum,3));
+        handles.settings = settings;
+        guidata(handles.figure_collect,handles);
+        if checked
+            setpref('carma','srate',srate);
+        end
+    end
+end
+
+% ===============================================================================
+
+function menu_binsize_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    [bsize,checked] = uigetpref( ...
+        'collect','bsize', ...
+        'Select a Bin Size', ...
+        {'CARMA averages joystick samples into temporal bins which are output in an annotation file.';'Bin size determines how long each bin is and thus how many samples contribute to it.';'Smaller bin sizes retain the most information but may be highly autocorrelated.'}, ...
+        {'0.25','0.50','1.00','2.00','4.00';'0.25 s','0.50 s','1.00 s','2.00 s','4.00 s'}, ...
+        'ExtraOptions',{'Cancel'}, ...
+        'CheckboxString','Save as default setting');
+    uisetpref('clearall');
+    if ~strcmpi(bsize,'cancel')
+        settings.bsize = bsize;
+        handles.settings = settings;
+        guidata(handles.figure_collect,handles);
+        if checked
+            setpref('carma','bsize',bsize);
+        end
+    end
+end
+
+% ===============================================================================
+
+function menu_defaultdir_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    path = uigetdir(settings.defdir,'Select a new default folder:');
+    if isequal(path,0), return; end
+    settings.defdir = path;
+    setpref('carma','defdir',path);
+    handles.settings = settings;
+    guidata(handles.figure_collect,handles);
+end
+
 % =========================================================
 
 function menu_about_Callback(~,~)
@@ -284,7 +409,7 @@ function toggle_playpause_Callback(hObject,~)
         % If toggle button is set to play, update GUI elements
         set(hObject,'Enable','off','String','...');
         set(handles.menu_media,'Enable','off');
-        %set(handles.menu_settings,'Enable','off');
+        set(handles.menu_settings,'Enable','off');
         set(handles.menu_help,'Enable','off');
         % Start three second countdown before starting
         set(hObject,'String','...3...'); pause(1);
@@ -314,9 +439,9 @@ function timer_Callback(~,~,handles)
     if recording == 0
         [a,~,~] = read(handles.joy); %ranges from -1 to 1
         y = -1 * a(2); %read y value and reverse its sign
-        axis_range = handles.settings.axis_max - handles.settings.axis_min;
-        axis_middle = handles.settings.axis_min + axis_range / 2;
-        val = axis_middle + y * axis_range / 2; %scale to user axis
+        axRange = handles.settings.axMax - handles.settings.axMin;
+        axMidpt = handles.settings.axMin + axRange / 2;
+        val = axMidpt + y * axRange / 2; %scale to user axis
         set(handles.plot_line,'YData',[val val]);
         set(handles.plot_marker,'YData',val,'MarkerFaceColor','w');
         return;
@@ -342,9 +467,9 @@ function timer_Callback(~,~,handles)
             last_ts_sys = ts_sys;
         end
         y = -1 * a(2); %read y value and reverse its sign
-        axis_range = handles.settings.axis_max - handles.settings.axis_min;
-        axis_middle = handles.settings.axis_min + axis_range / 2;
-        val = axis_middle + y * axis_range / 2; %scale to user axis
+        axRange = handles.settings.axMax - handles.settings.axMin;
+        axMidpt = handles.settings.axMin + axRange / 2;
+        val = axMidpt + y * axRange / 2; %scale to user axis
         set(handles.plot_line,'YData',[val val]);
         set(handles.plot_marker,'YData',val,'MarkerFaceColor','r');
         ratings = [ratings; ts_vlc, val];
@@ -361,7 +486,7 @@ function timer_Callback(~,~,handles)
         % Average ratings per second of playback
         rating = ratings;
         disp(rating);
-        anchors = [0,(1/handles.settings.sps:1/handles.settings.sps:floor(handles.dur))];
+        anchors = [0,(str2double(handles.settings.bsize):str2double(handles.settings.bsize):floor(handles.dur))];
         mean_ratings = nan(length(anchors)-1,2);
         mean_ratings(:,1) = anchors(2:end)';
         for i = 1:length(anchors)-1
@@ -374,17 +499,17 @@ function timer_Callback(~,~,handles)
         end
         % Prompt user to save the collected annotations
         [~,defaultname,ext] = fileparts(handles.MRL);
-        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
+        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',fullfile(handles.settings.defdir,defaultname));
         if ~isequal(filename,0) && ~isequal(pathname,0)
             % Add metadata to mean ratings and timestamps
             output = [ ...
                 {'Time of Rating'},{datestr(now)}; ...
                 {'Multimedia File'},{sprintf('%s%s',defaultname,ext)}; ...
-                {'Lower Label'},{handles.settings.axis_lower}; ...
-                {'Upper Label'},{handles.settings.axis_upper}; ...
-                {'Minimum Value'},{handles.settings.axis_min}; ...
-                {'Maximum Value'},{handles.settings.axis_max}; ...
-                {'Number of Steps'},{handles.settings.axis_steps}; ...
+                {'Lower Label'},{handles.settings.labLower}; ...
+                {'Upper Label'},{handles.settings.labUpper}; ...
+                {'Minimum Value'},{handles.settings.axMin}; ...
+                {'Maximum Value'},{handles.settings.axMax}; ...
+                {'Number of Steps'},{handles.settings.axSteps}; ...
                 {'Second'},{'Rating'}; ...
                 {'%%%%%%'},{'%%%%%%'}; ...
                 num2cell(mean_ratings)];
@@ -441,14 +566,14 @@ function program_reset(handles)
     set(handles.text_duration,'String','00:00:00');
     set(handles.toggle_playpause,'Enable','off','String','Begin Rating');
     set(handles.menu_media,'Enable','on');
-    %set(handles.menu_settings,'Enable','on');
+    set(handles.menu_settings,'Enable','on');
     set(handles.menu_closemedia,'Enable','off');
     set(handles.menu_preview,'Enable','off');
     set(handles.menu_help,'Enable','on');
-    axis_range = handles.settings.axis_max - handles.settings.axis_min;
-    midpoint = handles.settings.axis_min + axis_range/2;
-    set(handles.plot_line,'YData',[midpoint midpoint]);
-    set(handles.plot_marker,'YData',midpoint);
+    axRange = handles.settings.axMax - handles.settings.axMin;
+    axMidpt = handles.settings.axMin + axRange/2;
+    set(handles.plot_line,'YData',[axMidpt axMidpt]);
+    set(handles.plot_marker,'YData',axMidpt);
     drawnow();
     guidata(handles.figure_collect,handles);
 end
