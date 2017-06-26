@@ -55,6 +55,13 @@ function fig_launcher
                 web('http://www.videolan.org/vlc/download-windows.html','-browser');
         end
     end
+    % Get or set default settings
+    pExist = ispref('carma');
+    if ~pExist
+        addpref('carma', ...
+            {'labLower','labUpper','axMin','axMax','axSteps','cmapval','cmapstr','defdir','srateval','sratenum','bsizeval','bsizenum','update'}, ...
+            {'Negative Affect','Positive Affect',-100,100,9,1,'parula','',2,20,3,1.00,'ask'});
+    end
     % Check for updates
     try
         rss = urlread('https://github.com/jmgirard/CARMA/releases');
@@ -62,10 +69,12 @@ function fig_launcher
         newest = str2double(rss(index(1)+7:index(1)+10));
         current = version;
         if current < newest
-            choice = questdlg(sprintf('CARMA has detected that an update is available.\nOpen download page?'),...
-                'CARMA','Yes','No','Yes');
+            choice = uigetpref('carma','update', ...
+                'New Version', ...
+                {'CARMA has detected that an updated version is available.';'Open the download page in your web browser?'}, ...
+                {'yes','no';'Yes','No'});
             switch choice
-                case 'Yes'
+                case 'yes'
                     web('https://github.com/jmgirard/CARMA/releases/','-browser');
                     delete(handles.figure_launcher);
             end

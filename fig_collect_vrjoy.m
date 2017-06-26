@@ -3,12 +3,6 @@ function fig_collect_vrjoy
 % License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
     % Get default settings
-    pExist = ispref('carma');
-    if ~pExist
-        addpref('carma', ...
-            {'labLower','labUpper','axMin','axMax','axSteps','cmapval','cmapstr','defdir','srateval','sratenum','bsizeval','bsizenum'}, ...
-            {'Negative Affect','Positive Affect',-100,100,9,1,'parula','',2,20,3,1.00});
-    end
     handles.settings = getpref('carma');
     % Create and center main window
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
