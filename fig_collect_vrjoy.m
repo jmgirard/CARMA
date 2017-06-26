@@ -125,8 +125,7 @@ function fig_collect_vrjoy
     % Plot current value indicator on rating axis
     axMin = handles.settings.axMin;
     axMax = handles.settings.axMax;
-    axRange = axMax - axMin;
-    axMidpt = axMin + axRange/2;
+    axMidpt = axMin + (axMax - axMin)/2;
     axes(handles.axis_rating);
     hold on;
     c = eval(handles.settings.cmapstr);
@@ -618,7 +617,7 @@ function timer_ErrorFcn(hObject,event,~)
     handles.vlc.playlist.togglePause();
     stop(handles.timer);
     msgbox(sprintf('Timer callback error:\n%s\nAn error log has been saved.',event.Data.message),'Error','error');
-    csvwrite(fullfile(handles.settings.folder,sprintf('%s.csv',datestr(now,30))),ratings);
+    csvwrite(fullfile(handles.settings.defdir,sprintf('%s.csv',datestr(now,30))),ratings);
     guidata(handles.figure_collect,handles);
 end
 

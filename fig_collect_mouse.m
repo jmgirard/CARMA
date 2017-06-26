@@ -2,11 +2,12 @@ function fig_collect_mouse
 %FIG_COLLECT_MOUSE Window for the collection of ratings using the mouse
 % License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
+    % Get default settings
+    handles.settings = getpref('carma');
     % Create and center main window
-    addpath('Functions');
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_collect = figure( ...
-        'Name','CARMA: Collect', ...
+        'Name','CARMA: Collect Ratings', ...
         'MenuBar','none', ...
         'ToolBar','none', ...
         'NumberTitle','off', ...
@@ -16,10 +17,53 @@ function fig_collect_mouse
         'KeyPressFcn',@figure_collect_KeyPress, ...
         'CloseRequestFcn',@figure_collect_CloseReq);
     % Create menu bar elements
-    handles.menu_multimedia = uimenu(handles.figure_collect, ...
-        'Parent',handles.figure_collect, ...
-        'Label','Open Multimedia File', ...
-        'Callback',@menu_multimedia_Callback);
+    handles.menu_media = uimenu(handles.figure_collect, ...
+        'Label','Media');        
+    handles.menu_openmedia = uimenu(handles.menu_media, ...
+        'Label','Open Media File', ...
+        'Callback',@menu_openmedia_Callback);
+    handles.menu_volume = uimenu(handles.menu_media, ...
+        'Label','Adjust Volume', ...
+        'Callback',@menu_volume_Callback);
+    handles.menu_preview = uimenu(handles.menu_media, ...
+        'Label','Preview Media File', ...
+        'Enable','off', ...
+        'Callback',@menu_preview_Callback);
+    handles.menu_closemedia = uimenu(handles.menu_media, ...
+        'Label','Close Media File', ...
+        'Enable','off', ...
+        'Callback',@menu_closemedia_Callback);
+    handles.menu_settings = uimenu(handles.figure_collect, ...
+        'Label','Settings');
+    handles.menu_axislab = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Labels', ...
+        'Callback',@menu_axislab_Callback);
+    handles.menu_axisnum = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Numbers', ...
+        'Callback',@menu_axisnum_Callback);
+    handles.menu_colormap = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Colormap', ...
+        'Callback',@menu_colormap_Callback);
+    handles.menu_srate = uimenu(handles.menu_settings, ...
+        'Label','Set Sampling Rate', ...
+        'Callback',@menu_srate_Callback);
+    handles.menu_bsize = uimenu(handles.menu_settings, ...
+        'Label','Set Bin Size', ...
+        'Callback',@menu_bsize_Callback);
+    handles.menu_defaultdir = uimenu(handles.menu_settings, ...
+        'Label','Set Default Folder', ...
+        'Callback',@menu_defaultdir_Callback);
+    handles.menu_help = uimenu(handles.figure_collect, ...
+        'Label','Help');
+    handles.menu_about = uimenu(handles.menu_help, ...
+        'Label','About', ...
+        'Callback',@menu_about_Callback);
+    handles.menu_document = uimenu(handles.menu_help, ...
+        'Label','Documentation', ...
+        'Callback',@menu_document_Callback);
+    handles.menu_report = uimenu(handles.menu_help, ...
+        'Label','Report Issues', ...
+        'Callback',@menu_report_Callback);
     % Set minimum size
     set(handles.figure_collect,'Units','normalized','Position',[0.1,0.1,0.8,0.8],'Visible','on');
     drawnow;
@@ -29,88 +73,80 @@ function fig_collect_mouse
     jWindow = jClient.getWindow;
     jWindow.setMinimumSize(java.awt.Dimension(1024,768));
     % Create uicontrol elements
-    handles.text_report = uicontrol('Style','edit', ...
-        'Parent',handles.figure_collect, ...
-        'Units','Normalized', ...
-        'Position',[.01 .02 .22 .05], ...
-        'String','Open File', ...
-        'FontSize',14.0, ...
-        'Enable','off');
-    handles.text_filename = uicontrol('Style','edit', ...
-        'Parent',handles.figure_collect, ...
-        'Units','Normalized', ...
-        'Position',[.24 .02 .40 .05], ...
-        'FontSize',14.0, ...
-        'Enable','off');
-    handles.text_duration = uicontrol('Style','edit', ...
-        'Parent',handles.figure_collect, ...
-        'Units','Normalized', ...
-        'Position',[.65 .02 .22 .05], ...
-        'FontSize',14.0, ...
-        'Enable','off');
-    handles.toggle_playpause = uicontrol('Style','togglebutton', ...
-        'Parent',handles.figure_collect, ...
+    handles.axis_info = axes(handles.figure_collect, ...
+        'Units','normalized', ...
+        'Position',[.01 .02 .86 .05], ...
+        'XLim',[0,100],'YLim',[0,1], ...
+        'XTick',(0:10:100),'TickLength',[0.005 0],'XTickLabel',[], ...
+        'Box','on','Layer','top','YTick',[]);
+    handles.timebar = rectangle(handles.axis_info, ...
+        'Position',[0,0,0,1],'FaceColor',[0.000,0.447,0.741]);
+    handles.text_filename = text(handles.axis_info, ...
+        50,0.5,'Media Filename','HorizontalAlignment','center','Interpreter','none');
+    handles.text_timestamp = text(handles.axis_info, ...
+        05,0.5,'00:00:00','HorizontalAlignment','center');
+    handles.text_duration = text(handles.axis_info, ...
+        95,0.5,'00:00:00','HorizontalAlignment','center');
+    handles.toggle_playpause = uicontrol(handles.figure_collect, ...
+        'Style','togglebutton', ...
         'Units','Normalized', ...
         'Position',[.88 .02 .11 .05], ...
-        'String','Play', ...
-        'FontSize',14.0, ...
+        'String','Begin Rating', ...
+        'FontSize',12, ...
         'Callback',@toggle_playpause_Callback, ...
-        'Enable','inactive');
+        'Enable','off');
+    handles.text_upper = uicontrol(handles.figure_collect, ...
+        'Style','text', ...
+        'Units','Normalized', ...
+        'Position',[.88 .952 .11 .03], ...
+        'FontSize',10.0, ...
+        'FontWeight','bold', ...
+        'BackgroundColor',defaultBackground);
+    handles.text_lower = uicontrol(handles.figure_collect, ...
+        'Style','text', ...
+        'Units','Normalized', ...
+        'Position',[.88 .09 .11 .02], ...
+        'FontSize',10.0, ...
+        'FontWeight','bold', ...
+        'BackgroundColor',defaultBackground);
     handles.slider = uicontrol('Style','slider', ...
         'Parent',handles.figure_collect, ...
         'Units','Normalized', ...
-        'Position',[.94 .09 .05 .89], ...
+        'Position',[.965 .12 .025 .83], ...
         'BackgroundColor',[.5 .5 .5], ...
         'KeyPressFcn',@figure_collect_KeyPress);
-    handles.axis_upper = uicontrol('Style','text', ...
+    handles.axis_rating = axes('Units','Normalized', ...
         'Parent',handles.figure_collect, ...
-        'Units','Normalized', ...
-        'Position',[.88 .965 .05 .02], ...
-        'FontSize',10.0, ...
-        'BackgroundColor',defaultBackground);
-    handles.axis_lower = uicontrol('Style','text', ...
-        'Parent',handles.figure_collect, ...
-        'Units','Normalized', ...
-        'Position',[.88 .084 .05 .02], ...
-        'FontSize',10.0, ...
-        'BackgroundColor',defaultBackground);
-    handles.axis_image = axes('Units','Normalized', ...
-        'Parent',handles.figure_collect, ...
-        'Position',[.88 .109 .05 .853], ...
-        'Box','on','XTick',[],'YTick',[],'Layer','top');
+        'OuterPosition',[.88 .12 .075 .83], ...
+        'Box','on','XTick',[],'Layer','top');
     handles.axis_guide = axes('Units','Normalized', ...
         'Parent',handles.figure_collect, ...
         'Position',[.01 .09 .86 .89], ...
-        'Box','on','XTick',[],'YTick',[],'Color','blue');
+        'Box','on','XTick',[],'YTick',[],'Color','k');
     % Update axis labels and slider parameters
-    global settings;
-    set(handles.axis_lower,'String',settings.axis_lower);
-    set(handles.axis_upper,'String',settings.axis_upper);
-    set(handles.slider,...
-        'SliderStep',[1/(settings.axis_steps-1) 1/(settings.axis_steps-1)],...
-        'Min',settings.axis_min,...
-        'Max',settings.axis_max,...
-        'Value',settings.axis_max-(settings.axis_max-settings.axis_min)/2);
+    set(handles.text_lower,'String',handles.settings.labLower);
+    set(handles.text_upper,'String',handles.settings.labUpper);
+    axMin = handles.settings.axMin;
+    axMax = handles.settings.axMax;
+    axMidpt = axMin + (axMax - axMin)/2;
+    set(handles.slider, ...
+        'SliderStep',[1/40,1/20], ...
+        'Min',axMin,'Max',axMax,'Value',axMidpt);
     % Initialize rating axis
-    axes(handles.axis_image);
-    set(gca,'XLim',[0,70],'YLim',[0,450]);
-    axis ij; hold on;
-    % Create and display custom color gradient in rating axis
-    image([colorGradient(settings.axis_color1,settings.axis_color2,225,70); ...
-        colorGradient(settings.axis_color2,settings.axis_color3,225,70)]);
-    % Plot hash-marks on rating axis
-    for i = 1:settings.axis_steps-1
-        plot([1,5],[450,450]*i/settings.axis_steps,'k-');
-        plot([65,70],[450,450]*i/settings.axis_steps,'k-');
-    end
-    % Plot numerical labels on rating axis
-    axis_labels = linspace(settings.axis_max,settings.axis_min,settings.axis_steps);
-    for i = 1:length(axis_labels)
-        xval = 37.5;
-        yval = (((450*(i-1))/settings.axis_steps)+((450*i)/settings.axis_steps))/2;
-        text(xval,yval,sprintf('%.2f',axis_labels(i)),'HorizontalAlignment','center','Color','black','Fontweight','bold');
-    end
-    hold off;
+    axes(handles.axis_rating);
+    set(handles.axis_rating,'XLim',[0,100],'YLim',[0,100]);
+    c = eval(handles.settings.cmapstr);
+    colormap(handles.axis_rating,c);
+    handles.plot_patch = patch([0 100 100 0],[axMin axMin axMax axMax],[1 1 2 2]);
+    set(handles.axis_rating, ...
+        'XLim',[0 100],'XTick',[], ...
+        'YLim',[axMin axMax], ...
+        'YTick',round(linspace(axMin,axMax,handles.settings.axSteps),2), ...
+        'Box','on','Layer','top','Color','w');
+    li = get(handles.axis_rating,'LooseInset');
+    ti = get(handles.axis_rating,'TightInset');
+    ni = li; ni(2) = ti(2); ni(4) = ti(4);
+    set(handles.axis_rating,'LooseInset',ni)
     % Invoke and configure VLC ActiveX Controller
     handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_collect);
     handles.vlc.AutoPlay = 0;
@@ -119,7 +155,7 @@ function fig_collect_mouse
     % Create timer
     handles.timer = timer(...
         'ExecutionMode','fixedRate', ...
-        'Period',0.05, ...
+        'Period',round(1/handles.settings.sratenum,3), ...
         'TimerFcn',{@timer_Callback,handles}, ...
         'ErrorFcn',{@timer_ErrorFcn,handles});
     % Start system clock to improve VLC time stamp precision
@@ -132,20 +168,21 @@ end
 
 % =========================================================
 
-function menu_multimedia_Callback(hObject,~)
+function menu_openmedia_Callback(hObject,~)
     handles = guidata(hObject);
     % Reset the GUI elements
     program_reset(handles);
-    handles.vlc.playlist.items.clear();
     global ratings last_ts_vlc last_ts_sys;
     ratings = [];
     last_ts_vlc = 0;
     last_ts_sys = 0;
-    % Browse for, load, and get text_duration for a multimedia file
-    [video_name,video_path] = uigetfile({'*.*','All Files (*.*)'},'Select an audio or video file');
+    handles.vlc.playlist.items.clear();
+    % Browse for, load, and get text_duration for a media file
+    [video_name,video_path] = uigetfile({'*.*','All Files (*.*)'},'Select an audio or video file',handles.settings.defdir);
     if video_name==0, return; end
     try
         MRL = fullfile(video_path,video_name);
+        handles.VID = MRL;
         MRL(MRL=='\') = '/';
         handles.MRL = sprintf('file://localhost/%s',MRL);
         handles.vlc.playlist.add(handles.MRL);
@@ -156,15 +193,265 @@ function menu_multimedia_Callback(hObject,~)
         handles.vlc.playlist.togglePause();
         handles.vlc.input.time = 0;
         handles.dur = handles.vlc.input.length / 1000;
+        if handles.dur == 0
+            handles.vlc.playlist.items.clear();
+            error('Could not read duration of media file. The file meta-data may be damaged. Transcoding the streams (e.g., with HandBrake) may fix this problem.');
+        end
     catch err
-        msgbox(err.message,'Error loading multimedia file.'); return;
+        msgbox(err.message,'Error loading media file.'); return;
     end
     % Update GUI elements
-    set(handles.text_report,'String','Press Play');
+    set(handles.timebar,'Position',[0 0 0 1]);
+    set(handles.text_timestamp,'String','00:00:00');
     set(handles.text_filename,'String',video_name);
     set(handles.text_duration,'String',datestr(handles.dur/24/3600,'HH:MM:SS'));
-    set(handles.toggle_playpause,'Enable','On');
+    set(handles.menu_preview,'Enable','on');
+    set(handles.menu_closemedia,'Enable','on');
+    set(handles.toggle_playpause,'Enable','on');
     guidata(hObject,handles);
+end
+
+% ===============================================================================
+
+function menu_volume_Callback(hObject,~)
+    handles = guidata(hObject);
+    ovol = handles.vlc.audio.volume;
+    nvol = inputdlg(sprintf('Enter volume percentage:\n0=Mute, 100=Full Sound'),'',1,{num2str(ovol)});
+    nvol = str2double(nvol);
+    if isempty(nvol), return; end
+    if isnan(nvol), return; end
+    if nvol < 0, nvol = 0; end
+    if nvol > 100, nvol = 100; end
+    handles.vlc.audio.volume = nvol;
+    guidata(handles.figure_collect,handles);
+end
+
+% ===============================================================================
+
+function menu_preview_Callback(hObject,~)
+    handles = guidata(hObject);
+    winopen(handles.VID);
+end
+
+% ===============================================================================
+
+function menu_closemedia_Callback(hObject,~)
+    handles = guidata(hObject);
+    handles.vlc.playlist.stop();
+    handles.vlc.playlist.items.clear();
+    set(handles.menu_settings,'Enable','on');
+    set(handles.menu_closemedia,'Enable','off');
+    set(handles.menu_preview,'Enable','off');
+    set(handles.timebar,'Position',[0 0 0 1]);
+    set(handles.text_timestamp,'String','00:00:00');
+    set(handles.text_filename,'String','Media Filename');
+    set(handles.text_duration,'String','00:00:00');
+    guidata(handles.figure_collect,handles);
+end
+
+% ===============================================================================
+
+function menu_axislab_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    prompt = {'Upper axis label:','Lower axis label:'};
+    defaultans = {settings.labUpper,settings.labLower};
+    labels = inputdlg(prompt,'',1,defaultans);
+    if ~isempty(labels)
+        settings.labUpper = labels{1};
+        settings.labLower = labels{2};
+        set(handles.text_upper,'String',settings.labUpper);
+        set(handles.text_lower,'String',settings.labLower);
+        setpref('carma',{'labUpper','labLower'},{settings.labUpper,settings.labLower});
+        handles.settings = settings;
+        guidata(handles.figure_collect,handles);
+    end
+end
+
+% ===============================================================================
+
+function menu_axisnum_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    prompt = {'Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:'};
+    defaultans = {num2str(settings.axMin),num2str(settings.axMax),num2str(settings.axSteps)};
+    numbers = inputdlg(prompt,'',1,defaultans);
+    if ~isempty(numbers)
+        settings.axMin = str2double(numbers{1});
+        settings.axMax = str2double(numbers{2});
+        settings.axSteps = str2double(numbers{3});
+        set(handles.axis_rating, ...
+            'YLim',[settings.axMin,settings.axMax], ...
+            'YTick',round(linspace(settings.axMin,settings.axMax,settings.axSteps),2));
+        set(handles.plot_patch,'YData',[settings.axMin settings.axMin settings.axMax settings.axMax]);
+        setpref('carma',{'axMin','axMax','axSteps'},{settings.axMin,settings.axMax,settings.axSteps});
+        handles.settings = settings;
+        guidata(handles.figure_collect,handles);
+    end
+end
+
+% ===============================================================================
+
+function menu_colormap_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    d = dialog('Position',[0 0 500 200],'Name','Set Axis Colormap','Visible','off');
+    movegui(d,'center');
+    set(d,'Visible','on');
+    uicontrol(d, ...
+        'Style','text', ...
+        'Units','Normalized', ...
+        'Position',[.10 .50 .80 .40], ...
+        'String','CARMA displays a colormap gradient as a visual representation of the rating scale. Several preset colormaps are available (and more can be added upon request through the CARMA website). Select a colormap below:');
+    popup_cmap = uicontrol(d, ...
+        'Style','popup', ...
+        'Units','Normalized', ...
+        'Position',[.10 .35 .80 .20], ...
+        'String',{'Parula','Jet','Hot','Cool','Spring','Summer','Autumn','Winter','Bone'}, ...
+        'Value',settings.cmapval);
+    uicontrol(d, ...
+        'Style','pushbutton', ...
+        'Units','Normalized', ...
+        'Position',[.30 .10 .40 .20], ...
+        'FontWeight','bold', ...
+        'String','Submit', ...
+        'Callback',@push_save_Callback);
+    stop(handles.timer);
+    uiwait(d);
+    handles.settings = settings;
+    guidata(handles.figure_collect,handles);
+    start(handles.timer);
+    function push_save_Callback(~,~)
+        cmapval = popup_cmap.Value;
+        cmapstr = popup_cmap.String{cmapval};
+        cmapstr = lower(cmapstr);
+        settings.cmapval = cmapval;
+        settings.cmapstr = cmapstr;
+        axes(handles.axis_rating);
+        c = eval(cmapstr);
+        colormap(handles.axis_rating,c);
+        setpref('carma',{'cmapval','cmapstr'},{cmapval,cmapstr});
+        delete(d);
+    end
+end
+
+% ===============================================================================
+
+function menu_srate_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    d = dialog('Position',[0 0 500 200],'Name','Set Sampling Rate','Visible','off');
+    movegui(d,'center');
+    set(d,'Visible','on');
+    uicontrol(d, ...
+        'Style','text', ...
+        'Units','Normalized', ...
+        'Position',[.10 .50 .80 .40], ...
+        'String','CARMA can sample the slider at different frequencies. Higher sampling rates provide more data redundancy but also impose a larger computational load. A sampling rate of 20 or 30 Hz is recommended for modern computers and 10 Hz is recommended for older or slower computers. Select a sampling rate below:');
+    popup_srate = uicontrol(d, ...
+        'Style','popup', ...
+        'Units','Normalized', ...
+        'Position',[.10 .35 .80 .20], ...
+        'String',{'10 Hz','20 Hz','30 Hz'}, ...
+        'Value',settings.srateval);
+    uicontrol(d, ...
+        'Style','pushbutton', ...
+        'Units','Normalized', ...
+        'Position',[.30 .10 .40 .20], ...
+        'FontWeight','bold', ...
+        'String','Submit', ...
+        'Callback',@push_save_Callback);
+    stop(handles.timer);
+    uiwait(d);
+    handles.settings = settings;
+        guidata(handles.figure_collect,handles);
+    start(handles.timer);
+    function push_save_Callback(~,~)
+        srateval = popup_srate.Value;
+        sratenum = popup_srate.String{srateval};
+        sratenum = str2double(sratenum(1,1:2));
+        settings.srateval = srateval;
+        settings.sratenum = sratenum;
+        setpref('carma',{'srateval','sratenum'},{srateval,sratenum});
+        if handles.timer.Running, stop(handles.timer); end
+        set(handles.timer,'Period',round(1/settings.sratenum,3));
+        if ~handles.timer.Running, start(handles.timer); end
+        delete(d);
+    end
+end
+
+% ===============================================================================
+
+function menu_bsize_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    d = dialog('Position',[0 0 500 200],'Name','Set Bin Size','Visible','off');
+    movegui(d,'center');
+    set(d,'Visible','on');
+    uicontrol(d, ...
+        'Style','text', ...
+        'Units','Normalized', ...
+        'Position',[.10 .50 .80 .40], ...
+        'String','CARMA averages slider samples into temporal bins which are output in annotation files. The duration of each bin is configurable. Smaller bins preserve the most information but may be more noisy and autocorrelated.');
+    popup_bsize = uicontrol(d, ...
+        'Style','popup', ...
+        'Units','Normalized', ...
+        'Position',[.10 .35 .80 .20], ...
+        'String',{'0.25 seconds','0.50 seconds','1.00 seconds','2.00 seconds','4.00 seconds'}, ...
+        'Value',settings.bsizeval);
+    uicontrol(d, ...
+        'Style','pushbutton', ...
+        'Units','Normalized', ...
+        'Position',[.30 .10 .40 .20], ...
+        'FontWeight','bold', ...
+        'String','Submit', ...
+        'Callback',@push_save_Callback);
+    stop(handles.timer);
+    uiwait(d);
+    handles.settings = settings;
+    guidata(handles.figure_collect,handles);
+    start(handles.timer);
+    function push_save_Callback(~,~)
+        bsizeval = popup_bsize.Value;
+        bsizenum = popup_bsize.String{bsizeval};
+        bsizenum = str2double(bsizenum(1,1:4));
+        settings.bsizeval = bsizeval;
+        settings.bsizenum = bsizenum;
+        setpref('carma',{'bsizeval','bsizenum'},{bsizeval,bsizenum});
+        delete(d);
+    end
+end
+
+% ===============================================================================
+
+function menu_defaultdir_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    path = uigetdir(settings.defdir,'Select a new default folder:');
+    if isequal(path,0), return; end
+    settings.defdir = path;
+    setpref('carma','defdir',path);
+    handles.settings = settings;
+    guidata(handles.figure_collect,handles);
+end
+
+% =========================================================
+
+function menu_about_Callback(~,~)
+    global version;
+    msgbox(sprintf('CARMA version %.2f\nJeffrey M Girard (c) 2014-2017\nhttp://carma.jmgirard.com\nGNU General Public License v3',version),'About','Help');
+end
+
+% ===============================================================================
+
+function menu_document_Callback(~,~)
+    web('https://github.com/jmgirard/CARMA/wiki','-browser');
+end
+
+% ===============================================================================
+
+function menu_report_Callback(~,~)
+    web('https://github.com/jmgirard/CARMA/issues','-browser');
 end
 
 % =========================================================
@@ -172,12 +459,12 @@ end
 function figure_collect_KeyPress(hObject,eventdata)
     handles = guidata(hObject);
     % Escape if the playpause button is disabled
-    if strcmp(get(handles.toggle_playpause,'enable'),'inactive'), return; end
+    if strcmp(get(handles.toggle_playpause,'Enable'),'off'), return; end
     % Pause playback if the pressed key is spacebar
-    if strcmp(eventdata.Key,'space') && get(handles.toggle_playpause,'value')
+    if strcmp(eventdata.Key,'space') && get(handles.toggle_playpause,'Value')
         handles.vlc.playlist.togglePause();
         stop(handles.timer);
-        set(handles.toggle_playpause,'String','Resume','Value',0);
+        set(handles.toggle_playpause,'String','Resume Rating','Value',0);
     else
         return;
     end
@@ -191,14 +478,16 @@ function toggle_playpause_Callback(hObject,~)
     if get(hObject,'Value')
         % If toggle button is set to play, update GUI elements
         start(handles.timer);
-        set(hObject,'Enable','Off','String','...');
-        set(handles.menu_multimedia,'Enable','off');
+        set(hObject,'Enable','off','String','...');
+        set(handles.menu_media,'Enable','off');
+        set(handles.menu_settings,'Enable','off');
+        set(handles.menu_help,'Enable','off');
         uicontrol(handles.slider);
         % Start three second countdown before starting
-        set(handles.text_report,'String','...3...'); pause(1);
-        set(handles.text_report,'String','..2..'); pause(1);
-        set(handles.text_report,'String','.1.'); pause(1);
-        set(hObject,'Enable','On','String','Pause');
+        set(hObject,'String','...3...'); pause(1);
+        set(hObject,'String','..2..'); pause(1);
+        set(hObject,'String','.1.'); pause(1);
+        set(hObject,'Enable','On','String','Pause Rating');
         guidata(hObject,handles);
         % Send play() command to VLC and wait for it to start playing
         handles.vlc.playlist.play();
@@ -206,8 +495,8 @@ function toggle_playpause_Callback(hObject,~)
         % If toggle button is set to pause, send pause() command to VLC
         handles.vlc.playlist.togglePause();
         stop(handles.timer);
-        handles.recording = 0;
-        set(hObject,'String','Resume','Value',0);
+        set(hObject,'String','Resume Rating','Value',0);
+        set(handles.menu_help,'Enable','on');
         guidata(hObject,handles);
     end
 end
@@ -216,7 +505,7 @@ end
 
 function timer_Callback(~,~,handles)
     handles = guidata(handles.figure_collect);
-    global settings ratings last_ts_vlc last_ts_sys global_tic;
+    global ratings last_ts_vlc last_ts_sys global_tic;
     % While playing
     if handles.vlc.input.state == 3
         ts_vlc = handles.vlc.input.time/1000;
@@ -228,20 +517,21 @@ function timer_Callback(~,~,handles)
             last_ts_vlc = ts_vlc;
             last_ts_sys = ts_sys;
         end
-        val = get(handles.slider,'value');
+        val = get(handles.slider,'Value');
         ratings = [ratings; ts_vlc, val];
-        set(handles.text_report,'string',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
+        frac = (ts_vlc / handles.dur) * 100;
+        set(handles.timebar,'Position',[0 0 frac 1]);
         drawnow();
+        guidata(handles.figure_collect,handles);
     % After playing
     elseif handles.vlc.input.state == 5 || handles.vlc.input.state == 6
         stop(handles.timer);
         handles.vlc.playlist.stop();
         set(handles.toggle_playpause,'Value',0);
-        set(handles.text_report,'string','Processing...');
         % Average ratings per second of playback
         rating = ratings;
-        %disp(rating);
-        anchors = [0,(1/settings.sps:1/settings.sps:floor(handles.dur))];
+        disp(rating);
+        anchors = [0,(handles.settings.bsizenum:handles.settings.bsizenum:floor(handles.dur))];
         mean_ratings = nan(length(anchors)-1,2);
         mean_ratings(:,1) = anchors(2:end)';
         for i = 1:length(anchors)-1
@@ -249,21 +539,22 @@ function timer_Callback(~,~,handles)
             s_end = anchors(i+1);
             index = (rating(:,1) >= s_start) & (rating(:,1) < s_end);
             bin = rating(index,2:end);
+            if isempty(bin), continue; end
             mean_ratings(i,:) = [s_end,nanmean(bin)];
         end
         % Prompt user to save the collected annotations
         [~,defaultname,ext] = fileparts(handles.MRL);
-        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
+        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',fullfile(handles.settings.defir,defaultname));
         if ~isequal(filename,0) && ~isequal(pathname,0)
             % Add metadata to mean ratings and timestamps
             output = [ ...
                 {'Time of Rating'},{datestr(now)}; ...
                 {'Multimedia File'},{sprintf('%s%s',defaultname,ext)}; ...
-                {'Lower Label'},{settings.axis_lower}; ...
-                {'Upper Label'},{settings.axis_upper}; ...
-                {'Minimum Value'},{settings.axis_min}; ...
-                {'Maximum Value'},{settings.axis_max}; ...
-                {'Number of Steps'},{settings.axis_steps}; ...
+                {'Lower Label'},{handles.settings.labLower}; ...
+                {'Upper Label'},{handles.settings.labUpper}; ...
+                {'Minimum Value'},{handles.settings.axMin}; ...
+                {'Maximum Value'},{handles.settings.axMax}; ...
+                {'Number of Steps'},{handles.settings.axSteps}; ...
                 {'Second'},{'Rating'}; ...
                 {'%%%%%%'},{'%%%%%%'}; ...
                 num2cell(mean_ratings)];
@@ -287,11 +578,13 @@ end
 
 % =========================================================
 
-function timer_ErrorFcn(~,~,handles)
-    handles = guidata(handles.figure_collect);
+function timer_ErrorFcn(hObject,event,~)
+    disp(event.Data);
+    handles = guidata(hObject);
     handles.vlc.playlist.togglePause();
     stop(handles.timer);
-    msgbox('Timer callback error.','Error','error');
+    msgbox(sprintf('Timer callback error:\n%s\nAn error log has been saved.',event.Data.message),'Error','error');
+    csvwrite(fullfile(handles.settings.defdir,sprintf('%s.csv',datestr(now,30))),ratings);
     guidata(handles.figure_collect,handles);
 end
 
@@ -307,15 +600,34 @@ end
 
 % =========================================================
 
+function program_reset(handles)
+    handles = guidata(handles.figure_collect);
+    % Update GUI elements to starting configuration
+    set(handles.timebar,'Position',[0 0 0 1]);
+    set(handles.text_timestamp,'String','00:00:00');
+    set(handles.text_filename,'String','Media Filename');
+    set(handles.text_duration,'String','00:00:00');
+    set(handles.toggle_playpause,'Enable','off','String','Begin Rating');
+    set(handles.menu_media,'Enable','on');
+    set(handles.menu_settings,'Enable','on');
+    set(handles.menu_closemedia,'Enable','off');
+    set(handles.menu_preview,'Enable','off');
+    set(handles.menu_help,'Enable','on');
+    set(handles.slider,'Value',get(handles.slider,'Max')-(get(handles.slider,'Max')-get(handles.slider,'Min'))/2);
+    drawnow();
+    guidata(handles.figure_collect,handles);
+end
+
+% =========================================================
+
 function figure_collect_CloseReq(hObject,~)
     handles = guidata(hObject);
     % Pause playback and rating
     if handles.vlc.input.state==3,handles.vlc.playlist.togglePause(); end
     if strcmp(handles.timer.Running,'on'), stop(handles.timer); end
-    set(handles.toggle_playpause,'String','Resume','Value',0);
+    set(handles.toggle_playpause,'String','Resume Rating','Value',0);
     guidata(handles.figure_collect,handles);
-    pause(.1); 
-    if handles.vlc.input.state==4
+    if handles.vlc.input.state==4 || handles.vlc.input.state==3
         %If ratings are being collected, prompt user to cancel them
         choice = questdlg('Do you want to cancel your current ratings?', ...
             'CARMA','Yes','No','No');
@@ -328,23 +640,8 @@ function figure_collect_CloseReq(hObject,~)
         end
     else
         %If ratings are not being collected, exit DARMA
-        delete(handles.vlc);
-        delete(handles.timer);
-        delete(gcf);
+        if strcmp(handles.timer.Running','on'), stop(handles.timer); end
+        delete(timerfind);
+        delete(handles.figure_collect);
     end
-end
-
-% =========================================================
-
-function program_reset(handles)
-    handles = guidata(handles.figure_collect);
-    % Update GUI elements to starting configuration
-    set(handles.text_report,'String','Open File');
-    set(handles.text_filename,'String','');
-    set(handles.text_duration,'String','');
-    set(handles.toggle_playpause,'Enable','off','String','Play');
-    set(handles.menu_multimedia,'Enable','on');
-    set(handles.slider,'Value',get(handles.slider,'Max')-(get(handles.slider,'Max')-get(handles.slider,'Min'))/2);
-    drawnow();
-    guidata(handles.figure_collect,handles);
 end
