@@ -611,12 +611,11 @@ end
 
 % =========================================================
 
-function timer_ErrorFcn(hObject,event,~)
+function timer_ErrorFcn(~,event,handles)
+    global ratings;
     disp(event.Data);
-    handles = guidata(hObject);
     handles.vlc.playlist.togglePause();
-    stop(handles.timer);
-    msgbox(sprintf('Timer callback error:\n%s\nAn error log has been saved.',event.Data.message),'Error','error');
+    msgbox(sprintf('Timer callback error:\n%s\nSamples prior to the error were saved in the default folder.',event.Data.message),'Error','error');
     csvwrite(fullfile(handles.settings.defdir,sprintf('%s.csv',datestr(now,30))),ratings);
     guidata(handles.figure_collect,handles);
 end

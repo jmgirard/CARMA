@@ -544,7 +544,7 @@ function timer_Callback(~,~,handles)
         end
         % Prompt user to save the collected annotations
         [~,defaultname,ext] = fileparts(handles.MRL);
-        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',fullfile(handles.settings.defir,defaultname));
+        [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',fullfile(handles.settings.defdir,defaultname));
         if ~isequal(filename,0) && ~isequal(pathname,0)
             % Add metadata to mean ratings and timestamps
             output = [ ...
@@ -578,12 +578,11 @@ end
 
 % =========================================================
 
-function timer_ErrorFcn(hObject,event,~)
+function timer_ErrorFcn(~,event,handles)
+    global ratings;
     disp(event.Data);
-    handles = guidata(hObject);
     handles.vlc.playlist.togglePause();
-    stop(handles.timer);
-    msgbox(sprintf('Timer callback error:\n%s\nAn error log has been saved.',event.Data.message),'Error','error');
+    msgbox(sprintf('Timer callback error:\n%s\nSamples prior to the error were saved in the default folder.',event.Data.message),'Error','error');
     csvwrite(fullfile(handles.settings.defdir,sprintf('%s.csv',datestr(now,30))),ratings);
     guidata(handles.figure_collect,handles);
 end
