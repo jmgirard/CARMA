@@ -6,8 +6,8 @@ function fig_collect_vrjoy
     pExist = ispref('carma');
     if ~pExist
         addpref('carma', ...
-            {'labLower','labUpper','axMin','axMax','axSteps','defdir','srate','bsize'}, ...
-            {'Negative Affect','Positive Affect',-100,100,9,'','20','0.50'});
+            {'labLower','labUpper','axMin','axMax','axSteps','cmapval','cmapstr','defdir','srateval','sratenum','bsizeval','bsizenum'}, ...
+            {'Negative Affect','Positive Affect',-100,100,9,1,'parula','',2,20,3,1.00});
     end
     handles.settings = getpref('carma');
     % Create and center main window
@@ -47,12 +47,15 @@ function fig_collect_vrjoy
     handles.menu_axisnum = uimenu(handles.menu_settings, ...
         'Label','Set Axis Numbers', ...
         'Callback',@menu_axisnum_Callback);
-    handles.menu_samplerate = uimenu(handles.menu_settings, ...
+    handles.menu_colormap = uimenu(handles.menu_settings, ...
+        'Label','Set Axis Colormap', ...
+        'Callback',@menu_colormap_Callback);
+    handles.menu_srate = uimenu(handles.menu_settings, ...
         'Label','Set Sampling Rate', ...
         'Callback',@menu_srate_Callback);
-    handles.menu_binsize = uimenu(handles.menu_settings, ...
+    handles.menu_bsize = uimenu(handles.menu_settings, ...
         'Label','Set Bin Size', ...
-        'Callback',@menu_binsize_Callback);
+        'Callback',@menu_bsize_Callback);
     handles.menu_defaultdir = uimenu(handles.menu_settings, ...
         'Label','Set Default Folder', ...
         'Callback',@menu_defaultdir_Callback);
@@ -132,6 +135,8 @@ function fig_collect_vrjoy
     axMidpt = axMin + axRange/2;
     axes(handles.axis_rating);
     hold on;
+    c = eval(handles.settings.cmapstr);
+    colormap(handles.axis_rating,c);
     handles.plot_patch = patch([0 100 100 0],[axMin axMin axMax axMax],[1 1 2 2]);
     handles.plot_line = plot(handles.axis_rating,[0 100],[axMidpt axMidpt],'-k','LineWidth',5);
     handles.plot_marker = plot(handles.axis_rating,50,axMidpt,'kd','LineWidth',2,'MarkerEdgeColor','k','MarkerFaceColor','w','MarkerSize',25);
@@ -159,10 +164,9 @@ function fig_collect_vrjoy
         return;
     end
     % Create timer
-    sratenum = str2double(handles.settings.srate);
     handles.timer = timer(...
         'ExecutionMode','fixedRate', ...
-        'Period',round(1/sratenum,3), ...
+        'Period',round(1/handles.settings.sratenum,3), ...
         'TimerFcn',{@timer_Callback,handles}, ...
         'ErrorFcn',{@timer_ErrorFcn,handles});
     % Start system clock to improve VLC time stamp precision
@@ -265,14 +269,13 @@ function menu_axislab_Callback(hObject,~)
     settings = handles.settings;
     prompt = {'Upper axis label:','Lower axis label:'};
     defaultans = {settings.labUpper,settings.labLower};
-    labels = inputdlg(prompt,'Set Axis Labels',1,defaultans);
+    labels = inputdlg(prompt,'',1,defaultans);
     if ~isempty(labels)
         settings.labUpper = labels{1};
         settings.labLower = labels{2};
         set(handles.text_upper,'String',settings.labUpper);
         set(handles.text_lower,'String',settings.labLower);
-        setpref('carma','labUpper',settings.labUpper);
-        setpref('carma','labLower',settings.labLower);
+        setpref('carma',{'labUpper','labLower'},{settings.labUpper,settings.labLower});
         handles.settings = settings;
         guidata(handles.figure_collect,handles);
     end
@@ -285,7 +288,7 @@ function menu_axisnum_Callback(hObject,~)
     settings = handles.settings;
     prompt = {'Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:'};
     defaultans = {num2str(settings.axMin),num2str(settings.axMax),num2str(settings.axSteps)};
-    numbers = inputdlg(prompt,'Set Axis Numbers',1,defaultans);
+    numbers = inputdlg(prompt,'',1,defaultans);
     if ~isempty(numbers)
         settings.axMin = str2double(numbers{1});
         settings.axMax = str2double(numbers{2});
@@ -294,11 +297,54 @@ function menu_axisnum_Callback(hObject,~)
             'YLim',[settings.axMin,settings.axMax], ...
             'YTick',round(linspace(settings.axMin,settings.axMax,settings.axSteps),2));
         set(handles.plot_patch,'YData',[settings.axMin settings.axMin settings.axMax settings.axMax]);
-        setpref('carma','axMin',settings.axMin);
-        setpref('carma','axMax',settings.axMax);
-        setpref('carma','axSteps',settings.axSteps);
+        setpref('carma',{'axMin','axMax','axSteps'},{settings.axMin,settings.axMax,settings.axSteps});
         handles.settings = settings;
         guidata(handles.figure_collect,handles);
+    end
+end
+
+% ===============================================================================
+
+function menu_colormap_Callback(hObject,~)
+    handles = guidata(hObject);
+    settings = handles.settings;
+    d = dialog('Position',[0 0 500 200],'Name','Set Axis Colormap','Visible','off');
+    movegui(d,'center');
+    set(d,'Visible','on');
+    uicontrol(d, ...
+        'Style','text', ...
+        'Units','Normalized', ...
+        'Position',[.10 .50 .80 .40], ...
+        'String','CARMA displays a colormap gradient as a visual representation of the rating scale. Several preset colormaps are available (and more can be added upon request through the CARMA website). Select a colormap below:');
+    popup_cmap = uicontrol(d, ...
+        'Style','popup', ...
+        'Units','Normalized', ...
+        'Position',[.10 .35 .80 .20], ...
+        'String',{'Parula','Jet','Hot','Cool','Spring','Summer','Autumn','Winter','Bone'}, ...
+        'Value',settings.cmapval);
+    uicontrol(d, ...
+        'Style','pushbutton', ...
+        'Units','Normalized', ...
+        'Position',[.30 .10 .40 .20], ...
+        'FontWeight','bold', ...
+        'String','Submit', ...
+        'Callback',@push_save_Callback);
+    stop(handles.timer);
+    uiwait(d);
+    handles.settings = settings;
+    guidata(handles.figure_collect,handles);
+    start(handles.timer);
+    function push_save_Callback(~,~)
+        cmapval = popup_cmap.Value;
+        cmapstr = popup_cmap.String{cmapval};
+        cmapstr = lower(cmapstr);
+        settings.cmapval = cmapval;
+        settings.cmapstr = cmapstr;
+        axes(handles.axis_rating);
+        c = eval(cmapstr);
+        colormap(handles.axis_rating,c);
+        setpref('carma',{'cmapval','cmapstr'},{cmapval,cmapstr});
+        delete(d);
     end
 end
 
@@ -307,46 +353,85 @@ end
 function menu_srate_Callback(hObject,~)
     handles = guidata(hObject);
     settings = handles.settings;
-    [srate,checked] = uigetpref( ...
-        'collect','bsize', ...
-        'Select a Bin Size', ...
-        {'CARMA can sample the joystick at different frequencies.';'Higher frequencies provide more data redundancy but also impose a larger computational load.';'Higher sampling rates are recommended for faster computers.'}, ...
-        {'10','20','30';'10 Hz','20 Hz','30 Hz'}, ...
-        'ExtraOptions',{'Cancel'}, ...
-        'CheckboxString','Save as default setting');
-    uisetpref('clearall');
-    if ~strcmpi(srate,'cancel')
-        sratenum = str2double(srate(1,1:2));
-        settings.srate = srate;
-        set(handles.timer,'Period',round(1/sratenum,3));
-        handles.settings = settings;
+    d = dialog('Position',[0 0 500 200],'Name','Set Sampling Rate','Visible','off');
+    movegui(d,'center');
+    set(d,'Visible','on');
+    uicontrol(d, ...
+        'Style','text', ...
+        'Units','Normalized', ...
+        'Position',[.10 .50 .80 .40], ...
+        'String','CARMA can sample the joystick at different frequencies. Higher sampling rates provide more data redundancy but also impose a larger computational load. A sampling rate of 20 or 30 Hz is recommended for modern computers and 10 Hz is recommended for older or slower computers. Select a sampling rate below:');
+    popup_srate = uicontrol(d, ...
+        'Style','popup', ...
+        'Units','Normalized', ...
+        'Position',[.10 .35 .80 .20], ...
+        'String',{'10 Hz','20 Hz','30 Hz'}, ...
+        'Value',settings.srateval);
+    uicontrol(d, ...
+        'Style','pushbutton', ...
+        'Units','Normalized', ...
+        'Position',[.30 .10 .40 .20], ...
+        'FontWeight','bold', ...
+        'String','Submit', ...
+        'Callback',@push_save_Callback);
+    stop(handles.timer);
+    uiwait(d);
+    handles.settings = settings;
         guidata(handles.figure_collect,handles);
-        if checked
-            setpref('carma','srate',srate);
-        end
+    start(handles.timer);
+    function push_save_Callback(~,~)
+        srateval = popup_srate.Value;
+        sratenum = popup_srate.String{srateval};
+        sratenum = str2double(sratenum(1,1:2));
+        settings.srateval = srateval;
+        settings.sratenum = sratenum;
+        setpref('carma',{'srateval','sratenum'},{srateval,sratenum});
+        if handles.timer.Running, stop(handles.timer); end
+        set(handles.timer,'Period',round(1/settings.sratenum,3));
+        if ~handles.timer.Running, start(handles.timer); end
+        delete(d);
     end
 end
 
 % ===============================================================================
 
-function menu_binsize_Callback(hObject,~)
+function menu_bsize_Callback(hObject,~)
     handles = guidata(hObject);
     settings = handles.settings;
-    [bsize,checked] = uigetpref( ...
-        'collect','bsize', ...
-        'Select a Bin Size', ...
-        {'CARMA averages joystick samples into temporal bins which are output in an annotation file.';'Bin size determines how long each bin is and thus how many samples contribute to it.';'Smaller bin sizes retain the most information but may be highly autocorrelated.'}, ...
-        {'0.25','0.50','1.00','2.00','4.00';'0.25 s','0.50 s','1.00 s','2.00 s','4.00 s'}, ...
-        'ExtraOptions',{'Cancel'}, ...
-        'CheckboxString','Save as default setting');
-    uisetpref('clearall');
-    if ~strcmpi(bsize,'cancel')
-        settings.bsize = bsize;
-        handles.settings = settings;
-        guidata(handles.figure_collect,handles);
-        if checked
-            setpref('carma','bsize',bsize);
-        end
+    d = dialog('Position',[0 0 500 200],'Name','Set Bin Size','Visible','off');
+    movegui(d,'center');
+    set(d,'Visible','on');
+    uicontrol(d, ...
+        'Style','text', ...
+        'Units','Normalized', ...
+        'Position',[.10 .50 .80 .40], ...
+        'String','CARMA averages joystick samples into temporal bins which are output in annotation files. The duration of each bin is configurable. Smaller bins preserve the most information but may be more noisy and autocorrelated.');
+    popup_bsize = uicontrol(d, ...
+        'Style','popup', ...
+        'Units','Normalized', ...
+        'Position',[.10 .35 .80 .20], ...
+        'String',{'0.25 seconds','0.50 seconds','1.00 seconds','2.00 seconds','4.00 seconds'}, ...
+        'Value',settings.bsizeval);
+    uicontrol(d, ...
+        'Style','pushbutton', ...
+        'Units','Normalized', ...
+        'Position',[.30 .10 .40 .20], ...
+        'FontWeight','bold', ...
+        'String','Submit', ...
+        'Callback',@push_save_Callback);
+    stop(handles.timer);
+    uiwait(d);
+    handles.settings = settings;
+    guidata(handles.figure_collect,handles);
+    start(handles.timer);
+    function push_save_Callback(~,~)
+        bsizeval = popup_bsize.Value;
+        bsizenum = popup_bsize.String{bsizeval};
+        bsizenum = str2double(bsizenum(1,1:4));
+        settings.bsizeval = bsizeval;
+        settings.bsizenum = bsizenum;
+        setpref('carma',{'bsizeval','bsizenum'},{bsizeval,bsizenum});
+        delete(d);
     end
 end
 
@@ -486,7 +571,7 @@ function timer_Callback(~,~,handles)
         % Average ratings per second of playback
         rating = ratings;
         disp(rating);
-        anchors = [0,(str2double(handles.settings.bsize):str2double(handles.settings.bsize):floor(handles.dur))];
+        anchors = [0,(handles.settings.bsizenum:handles.settings.bsizenum:floor(handles.dur))];
         mean_ratings = nan(length(anchors)-1,2);
         mean_ratings(:,1) = anchors(2:end)';
         for i = 1:length(anchors)-1
