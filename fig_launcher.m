@@ -41,7 +41,7 @@ function fig_launcher
         'Position',[0.525 0.10 0.425 0.40], ...
         'String','Review Ratings', ...
         'FontSize',18, ...
-        'Callback','fig_review()');
+        'Callback',@push_review_Callback);
     set(handles.figure_launcher,'Visible','on');
     guidata(handles.figure_launcher,handles);
 	addpath('Functions');
@@ -85,6 +85,8 @@ function fig_launcher
 end
 
 function push_collect_Callback(~,~)
+    e = findobj('type','figure','name','CARMA: Collect Ratings');
+    if ~isempty(e), return; end
     err.message = 'Joystick connected.';
     try
         vrjoystick(1);
@@ -108,6 +110,12 @@ function push_collect_Callback(~,~)
         % If some other problem with the joystick is detected, report it
         errordlg(err.message,'Error');
     end
+end
+
+function push_review_Callback(~,~)
+    e = findobj('type','figure','name','CARMA: Review Ratings');
+    if ~isempty(e), return; end
+    fig_review();
 end
 
 function website(~,~)

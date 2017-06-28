@@ -316,6 +316,7 @@ function menu_colormap_Callback(hObject,~)
         'FontWeight','bold', ...
         'String','Submit', ...
         'Callback',@push_save_Callback);
+    uiwait(d);
     handles.settings = settings;
     guidata(handles.figure_collect,handles);
     function push_save_Callback(~,~)
@@ -358,11 +359,9 @@ function menu_srate_Callback(hObject,~)
         'FontWeight','bold', ...
         'String','Submit', ...
         'Callback',@push_save_Callback);
-    stop(handles.timer);
     uiwait(d);
     handles.settings = settings;
-        guidata(handles.figure_collect,handles);
-    start(handles.timer);
+    guidata(handles.figure_collect,handles);
     function push_save_Callback(~,~)
         srateval = popup_srate.Value;
         sratenum = popup_srate.String{srateval};
@@ -403,11 +402,9 @@ function menu_bsize_Callback(hObject,~)
         'FontWeight','bold', ...
         'String','Submit', ...
         'Callback',@push_save_Callback);
-    stop(handles.timer);
     uiwait(d);
     handles.settings = settings;
     guidata(handles.figure_collect,handles);
-    start(handles.timer);
     function push_save_Callback(~,~)
         bsizeval = popup_bsize.Value;
         bsizenum = popup_bsize.String{bsizeval};
