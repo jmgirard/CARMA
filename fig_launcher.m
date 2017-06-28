@@ -84,7 +84,9 @@ function fig_launcher
     end
 end
 
-function push_collect_Callback(~,~)
+function push_collect_Callback(hObject,~)
+    handles = guidata(hObject);
+    set(handles.push_collect,'Enable','inactive');
     e = findobj('type','figure','name','CARMA: Collect Ratings');
     if isempty(e)
         err.message = 'Joystick connected.';
@@ -103,8 +105,6 @@ function push_collect_Callback(~,~)
                     fig_collect_mouse();
                 case 'Joystick'
                     fig_collect_vrjoy();
-                otherwise
-                    return;
             end
         else
             % If some other problem with the joystick is detected, report it
@@ -113,15 +113,19 @@ function push_collect_Callback(~,~)
     else
         uistack(e,'top');
     end
+    set(handles.push_collect,'Enable','on');
 end
 
-function push_review_Callback(~,~)
+function push_review_Callback(hObject,~)
+    handles = guidata(hObject);
+    set(handles.push_collect,'Enable','inactive');
     e = findobj('type','figure','name','CARMA: Review Ratings');
     if isempty(e)
         fig_review();
     else
         uistack(e,'top');
     end
+    set(handles.push_collect,'Enable','on');
 end
     
 
