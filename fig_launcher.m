@@ -86,37 +86,44 @@ end
 
 function push_collect_Callback(~,~)
     e = findobj('type','figure','name','CARMA: Collect Ratings');
-    if ~isempty(e), return; end
-    err.message = 'Joystick connected.';
-    try
-        vrjoystick(1);
-    catch err
-    end
-    if strcmp(err.message,'Joystick is not connected.')
-        % If no joystick is detected, default to the mouse version
-        fig_collect_mouse();
-    elseif strcmp(err.message,'Joystick connected.')
-        % If a joystick is detected, ask to use mouse or joystick
-        choice = questdlg('Which input device would you like to use?','CARMA','Mouse','Joystick','Joystick');
-        switch choice
-            case 'Mouse'
-                fig_collect_mouse();
-            case 'Joystick'
-                fig_collect_vrjoy();
-            otherwise
-                return;
+    if isempty(e)
+        err.message = 'Joystick connected.';
+        try
+            vrjoystick(1);
+        catch err
+        end
+        if strcmp(err.message,'Joystick is not connected.')
+            % If no joystick is detected, default to the mouse version
+            fig_collect_mouse();
+        elseif strcmp(err.message,'Joystick connected.')
+            % If a joystick is detected, ask to use mouse or joystick
+            choice = questdlg('Which input device would you like to use?','CARMA','Mouse','Joystick','Joystick');
+            switch choice
+                case 'Mouse'
+                    fig_collect_mouse();
+                case 'Joystick'
+                    fig_collect_vrjoy();
+                otherwise
+                    return;
+            end
+        else
+            % If some other problem with the joystick is detected, report it
+            errordlg(err.message,'Error');
         end
     else
-        % If some other problem with the joystick is detected, report it
-        errordlg(err.message,'Error');
+        uistack(e,'top');
     end
 end
 
 function push_review_Callback(~,~)
     e = findobj('type','figure','name','CARMA: Review Ratings');
-    if ~isempty(e), return; end
-    fig_review();
+    if isempty(e)
+        fig_review();
+    else
+        uistack(e,'top');
+    end
 end
+    
 
 function website(~,~)
     choice = questdlg('Open CARMA website in browser?','CARMA','Yes','No','Yes');
