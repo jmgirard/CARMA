@@ -142,7 +142,7 @@ function fig_collect_vrjoy
     li = get(handles.axis_rating,'LooseInset');
     ti = get(handles.axis_rating,'TightInset');
     ni = li; ni(2) = ti(2); ni(4) = ti(4);
-    set(handles.axis_rating,'LooseInset',ni)
+    set(handles.axis_rating,'LooseInset',ni);
     % Invoke and configure VLC ActiveX Controller
     handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_collect);
     handles.vlc.AutoPlay = 0;
