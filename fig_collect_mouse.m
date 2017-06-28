@@ -316,14 +316,12 @@ function menu_colormap_Callback(hObject,~)
         'FontWeight','bold', ...
         'String','Submit', ...
         'Callback',@push_save_Callback);
-    stop(handles.timer);
-    uiwait(d);
     handles.settings = settings;
     guidata(handles.figure_collect,handles);
-    start(handles.timer);
     function push_save_Callback(~,~)
         cmapval = popup_cmap.Value;
         cmapstr = popup_cmap.String{cmapval};
+        delete(d);
         cmapstr = lower(cmapstr);
         settings.cmapval = cmapval;
         settings.cmapstr = cmapstr;
@@ -331,7 +329,6 @@ function menu_colormap_Callback(hObject,~)
         c = eval(cmapstr);
         colormap(handles.axis_rating,c);
         setpref('carma',{'cmapval','cmapstr'},{cmapval,cmapstr});
-        delete(d);
     end
 end
 
@@ -369,6 +366,7 @@ function menu_srate_Callback(hObject,~)
     function push_save_Callback(~,~)
         srateval = popup_srate.Value;
         sratenum = popup_srate.String{srateval};
+        delete(d);
         sratenum = str2double(sratenum(1,1:2));
         settings.srateval = srateval;
         settings.sratenum = sratenum;
@@ -376,7 +374,6 @@ function menu_srate_Callback(hObject,~)
         if handles.timer.Running, stop(handles.timer); end
         set(handles.timer,'Period',round(1/settings.sratenum,3));
         if ~handles.timer.Running, start(handles.timer); end
-        delete(d);
     end
 end
 
@@ -414,11 +411,11 @@ function menu_bsize_Callback(hObject,~)
     function push_save_Callback(~,~)
         bsizeval = popup_bsize.Value;
         bsizenum = popup_bsize.String{bsizeval};
+        delete(d);
         bsizenum = str2double(bsizenum(1,1:4));
         settings.bsizeval = bsizeval;
         settings.bsizenum = bsizenum;
         setpref('carma',{'bsizeval','bsizenum'},{bsizeval,bsizenum});
-        delete(d);
     end
 end
 
