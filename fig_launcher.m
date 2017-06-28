@@ -87,8 +87,14 @@ end
 function push_collect_Callback(hObject,~)
     handles = guidata(hObject);
     set(handles.push_collect,'Enable','inactive');
-    e = findobj('type','figure','name','CARMA: Collect Ratings');
-    if isempty(e)
+    c = findobj('Type','figure','Name','CARMA: Collect Ratings');
+    r = findobj('Type','figure','Name','CARMA: Review Ratings');
+    if ~isempty(r)
+        msgbox('Only one window can be open at a time. Please close the Review Ratings window before opening the Collect Ratings window.','Error','modal');
+        set(handles.push_collect,'Enable','on');
+        return;
+    end
+    if isempty(c)
         err.message = 'Joystick connected.';
         try
             vrjoystick(1);
@@ -111,7 +117,7 @@ function push_collect_Callback(hObject,~)
             errordlg(err.message,'Error');
         end
     else
-        uistack(e,'top');
+        uistack(c,'top');
     end
     set(handles.push_collect,'Enable','on');
 end
@@ -119,15 +125,20 @@ end
 function push_review_Callback(hObject,~)
     handles = guidata(hObject);
     set(handles.push_collect,'Enable','inactive');
-    e = findobj('type','figure','name','CARMA: Review Ratings');
-    if isempty(e)
+    c = findobj('Type','figure','Name','CARMA: Collect Ratings');
+    r = findobj('Type','figure','Name','CARMA: Review Ratings');
+    if ~isempty(c)
+        msgbox('Only one window can be open at a time. Please close the Collect Ratings window before opening the Review Ratings window.','Error','modal');
+        set(handles.push_collect,'Enable','on');
+        return;
+    end
+    if isempty(r)
         fig_review();
     else
-        uistack(e,'top');
+        uistack(r,'top');
     end
     set(handles.push_collect,'Enable','on');
 end
-    
 
 function website(~,~)
     choice = questdlg('Open CARMA website in browser?','CARMA','Yes','No','Yes');
