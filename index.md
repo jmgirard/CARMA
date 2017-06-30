@@ -17,9 +17,9 @@ CARMA is a media annotation program that collects continuous ratings while displ
 CARMA was first published by Jeffrey Girard in 2014 under the GNU General Public License version 3 (GPUv3). Users are free to use, distribute, and modify the program as outlined in the license. CARMA is meant to be a modernization of Gottman & Levenson's affect rating dial. A journal publication describing CARMA and its use was published in 2014. However, note that the program and its functionality have changed a lot since that initial publication.
 
 ## Citation
-Users must agree to cite the [following article](http://openresearchsoftware.metajnl.com/articles/10.5334/jors.ar/) in all publications making use of CARMA:
+Users must agree to cite the following article in all publications making use of CARMA:
 
-Girard, J. M. (2014). CARMA: Software for continuous affect rating and media annotation. *Journal of Open Research Software*, 2(1), e5. http://doi.org/10.5334/jors.ar
+Girard, J. M. (2014). CARMA: Software for continuous affect rating and media annotation. *Journal of Open Research Software*, 2(1), e5. <http://doi.org/10.5334/jors.ar>
 
 ```
 @article{Girard2014e,
