@@ -22,7 +22,7 @@ Users must agree to cite the following article in all publications making use of
 Girard, J. M. (2014). CARMA: Software for continuous affect rating and media annotation. *Journal of Open Research Software*, 2(1), e5. <http://doi.org/10.5334/jors.ar>
 
 ```
-@article{Girard2014e,
+@article{CARMA,
 author = {Girard, Jeffrey M},
 journal = {Journal of Open Research Software},
 title = {CARMA: Software for continuous affect rating and media annotation},
