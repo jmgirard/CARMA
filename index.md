@@ -4,11 +4,6 @@ Software for Continuous Affect Rating and Media Annotation
 
 CARMA is a media annotation program that collects continuous ratings while displaying audio and video files. It is designed to be highly user-friendly and easily customizable. CARMA enables researchers and study participants to provide moment-by-moment ratings of multimedia files using a computer mouse, keyboard, or joystick. The rating scale can be configured on a number of parameters including its labels and numerical range. Annotations can be displayed alongside the multimedia file and saved for easy import into statistical analysis software. CARMA provides a tool for researchers in affective computing, human-computer interaction, and the social sciences who need to capture the unfolding of subjective experience and observable behavior over time.
 
-## Download
-* The latest release of CARMA will always be available from <https://github.com/jmgirard/CARMA/releases>
-* Documentation for CARMA can be accessed via the wiki at <https://github.com/jmgirard/CARMA/wiki>
-* Issues can be reported and features can be requested at <https://github.com/jmgirard/CARMA/issues>
-
 ## Screenshots
 <table width="100%">
 <tr>
@@ -22,7 +17,7 @@ CARMA is a media annotation program that collects continuous ratings while displ
 CARMA was first published by Jeffrey Girard in 2014 under the GNU General Public License version 3 (GPUv3). Users are free to use, distribute, and modify the program as outlined in the license. CARMA is meant to be a modernization of Gottman & Levenson's affect rating dial. A journal publication describing CARMA and its use was published in 2014. However, note that the program and its functionality have changed a lot since that initial publication.
 
 ## Citation
-Users must agree to cite the following article](https://osf.io/xhmu6/) in all publications making use of CARMA:
+Users must agree to cite the [following article](http://openresearchsoftware.metajnl.com/articles/10.5334/jors.ar/) in all publications making use of CARMA:
 
 Girard, J. M. (2014). CARMA: Software for continuous affect rating and media annotation. *Journal of Open Research Software*, 2(1), e5. http://doi.org/10.5334/jors.ar
 
@@ -30,7 +25,7 @@ Girard, J. M. (2014). CARMA: Software for continuous affect rating and media ann
 @article{Girard2014e,
 author = {Girard, Jeffrey M},
 journal = {Journal of Open Research Software},
-title = {{CARMA: Software for continuous affect rating and media annotation}},
+title = {CARMA: Software for continuous affect rating and media annotation},
 year = {2014},
 volume = {2},
 number = {1},
