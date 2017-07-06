@@ -68,14 +68,16 @@ function fig_review
     jWindow.setMinimumSize(java.awt.Dimension(1024,768));
     %Create uicontrol elements
     lc = .01; rc = .85;
-    handles.axMin = -100;
-    handles.axMax = 100;
+    handles.axMin = zeros(0,1);
+    handles.axMax = zeros(0,1);
+    axMin = -100;
+    axMax = 100;
     handles.axis_annotations = axes(handles.figure_review, ...
         'Units','Normalized', ...
         'OuterPosition',[lc+.02 .04+.01 .83-.02 .35-.01], ...
         'TickLength',[0.01 0], ...
-        'YLim',[handles.axMin,handles.axMax], ...
-        'YTick',linspace(handles.axMin,handles.axMax,5),'YGrid','on',...
+        'YLim',[axMin,axMax], ...
+        'YTick',linspace(axMin,axMax,5),'YGrid','on',...
         'XLim',[0,10],'XTick',(0:10),'Box','on', ...
         'PickableParts','none', ...
         'ButtonDownFcn',@axis_click_Callback);
@@ -84,7 +86,7 @@ function fig_review
     %'Position',[lc+.02 .04+.01 .83-.02 .35-.01], ...
     global tsline;
     hold on;
-    tsline = plot(handles.axis_annotations,[0,0],[handles.axMin,handles.axMax],'k');
+    tsline = plot(handles.axis_annotations,[0,0],[axMin,axMax],'k');
     hold off;
     handles.listbox = uicontrol(handles.figure_review, ...
         'Style','listbox', ...
@@ -136,8 +138,8 @@ function fig_review
         'Units','normalized', ...
         'OuterPosition',[.53 .42 .305 .565], ...
         'Box','on', ...
-        'YLim',[handles.axMin,handles.axMax], ...
-        'YTick',linspace(handles.axMin,handles.axMax,5), ...
+        'YLim',[axMin,axMax], ...
+        'YTick',linspace(axMin,axMax,5), ...
         'YGrid','on', ...
         'XLim',[-1 1], ...
         'XTick',0, ...
@@ -323,17 +325,19 @@ function addseries_Callback(hObject,~)
             secs = nums(10:end,1);
             ratings = nums(10:end,2);
         end
-        % Get settings from import file    
+        % Get settings from import file
         if isempty(handles.axMin) || isempty(handles.axMax)
             handles.axMin = axis_min;
             handles.axMax = axis_max;
         elseif handles.axMin ~= axis_min || handles.axMax ~= axis_max
             msgbox('Annotation files must have the same axis settings to be loaded together.','Error','Error');
+            waitbar(1);
             return;
         end
         % Check that the import file matches the media file
         if ~isempty(handles.AllRatings) && size(handles.AllRatings,1)~=size(ratings,1)
             msgbox('Annotation file must have the same bin size as the other annotation files.','Error','Error');
+            waitbar(1);
             return;
         else
             % Append the new file to the stored data
@@ -385,8 +389,8 @@ function remsel_Callback(hObject,~)
         handles.AllRatings = zeros(0,1);
         handles.MeanRatings = zeros(0,1);
         handles.AllFilenames = cell(0,1);
-        handles.axMin = -100;
-        handles.axMax = 100;
+        handles.axMin = zeros(0,1);
+        handles.axMax = zeros(0,1);
         cla(handles.axis_annotations);
         cla(handles.axis_summary);
         set(handles.axis_annotations,'PickableParts','none');
@@ -441,8 +445,8 @@ function remall_Callback(hObject,~)
     handles.MeanRatings = zeros(0,1);
     handles.AllFilenames = cell(0,1);
     handles.Seconds = zeros(0,1);
-    handles.axMin = -100;
-    handles.axMax = 100;
+    handles.axMin = zeros(0,1);
+    handles.axMax = zeros(0,1);
     cla(handles.axis_annotations);
     cla(handles.axis_summary);
     set(handles.axis_annotations,'PickableParts','none');
