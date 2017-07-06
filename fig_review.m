@@ -330,14 +330,14 @@ function addseries_Callback(hObject,~)
             handles.axMin = axis_min;
             handles.axMax = axis_max;
         elseif handles.axMin ~= axis_min || handles.axMax ~= axis_max
+            delete(w);
             msgbox('Annotation files must have the same axis settings to be loaded together.','Error','Error');
-            waitbar(1);
             return;
         end
         % Check that the import file matches the media file
         if ~isempty(handles.AllRatings) && size(handles.AllRatings,1)~=size(ratings,1)
+            delete(w);
             msgbox('Annotation file must have the same bin size as the other annotation files.','Error','Error');
-            waitbar(1);
             return;
         else
             % Append the new file to the stored data
@@ -349,7 +349,7 @@ function addseries_Callback(hObject,~)
             handles.MeanRatings = nanmean(handles.AllRatings,2);
             guidata(hObject,handles);
         end
-        waitbar(f/length(filenames));
+        waitbar(f/length(filenames),w);
     end
     update_plots(handles);
     update_boxplots(handles.figure_review,[]);
