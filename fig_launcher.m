@@ -3,7 +3,7 @@ function fig_launcher
 % License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
     global version;
-	version = 14.01;
+	version = 14.02;
     % Create and center main window
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_launcher = figure( ...
@@ -49,11 +49,11 @@ function fig_launcher
     axctl = actxcontrollist;
     index = strcmp(axctl(:,2),'VideoLAN.VLCPlugin.2');
     if sum(index)==0
-        choice = questdlg(sprintf('CARMA requires the free, open source VLC Media Player.\nPlease be sure to download the 64-bit Windows version.\nPlease be sure to enable the "ActiveX plugin" option.\nOpen download page?'),...
+        choice = questdlg(sprintf('CARMA requires the free, open source VLC Media Player.\nPlease be sure to download the 64-bit Windows version (vlc-xxx-win64.exe).\nPlease be sure to enable the "ActiveX plugin" option.\nOpen download page?'),...
             'CARMA','Yes','No','Yes');
         switch choice
             case 'Yes'
-                web('http://www.videolan.org/vlc/download-windows.html','-browser');
+                web('http://download.videolan.org/pub/videolan/vlc/last/win64/','-browser');
         end
     end
     % Get or set default settings
