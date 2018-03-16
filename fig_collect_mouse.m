@@ -433,7 +433,7 @@ end
 
 function menu_about_Callback(~,~)
     global version;
-    msgbox(sprintf('CARMA version %.2f\nJeffrey M Girard (c) 2014-2017\nhttp://carma.jmgirard.com\nGNU General Public License v3',version),'About','Help');
+    msgbox(sprintf('CARMA version %.2f\nJeffrey M Girard (c) 2014-2018\nhttp://carma.jmgirard.com\nGNU General Public License v3',version),'About','Help');
 end
 
 % ===============================================================================
@@ -521,6 +521,7 @@ function timer_Callback(~,~,handles)
     elseif handles.vlc.input.state == 5 || handles.vlc.input.state == 6
         stop(handles.timer);
         handles.vlc.playlist.stop();
+        ts_stop = datestr(now);
         set(handles.toggle_playpause,'Value',0);
         % Average ratings per second of playback
         rating = ratings;
@@ -542,7 +543,7 @@ function timer_Callback(~,~,handles)
         if ~isequal(filename,0) && ~isequal(pathname,0)
             % Add metadata to mean ratings and timestamps
             output = [ ...
-                {'Time of Rating'},{datestr(now)}; ...
+                {'Time at Media End'},{ts_stop}; ...
                 {'Multimedia File'},{sprintf('%s%s',defaultname,ext)}; ...
                 {'Lower Label'},{handles.settings.labLower}; ...
                 {'Upper Label'},{handles.settings.labUpper}; ...
