@@ -274,7 +274,7 @@ end
 
 function menu_about_Callback(~,~)
     global version;
-    msgbox(sprintf('CARMA version %.2f\nJeffrey M Girard (c) 2014-2017\nhttp://carma.jmgirard.com\nGNU General Public License v3',version),'About','Help');
+    msgbox(sprintf('CARMA version %.2f\nJeffrey M Girard (c) 2014-2018\nhttp://carma.jmgirard.com\nGNU General Public License v3',version),'About','Help');
 end
 
 % ===============================================================================
