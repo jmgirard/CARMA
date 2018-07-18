@@ -514,6 +514,7 @@ function timer_Callback(~,~,handles)
         val = get(handles.slider,'Value');
         ratings = [ratings; ts_vlc, val];
         frac = (ts_vlc / handles.dur) * 100;
+        set(handles.text_timestamp,'String',datestr(handles.vlc.input.time/1000/24/3600,'HH:MM:SS'));
         set(handles.timebar,'Position',[0 0 frac 1]);
         drawnow();
         guidata(handles.figure_collect,handles);
