@@ -148,10 +148,17 @@ function fig_collect_mouse
     ni = li; ni(2) = ti(2); ni(4) = ti(4);
     set(handles.axis_rating,'LooseInset',ni)
     % Invoke and configure VLC ActiveX Controller
-    handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_collect);
-    handles.vlc.AutoPlay = 0;
-    handles.vlc.Toolbar = 0;
-    handles.vlc.FullscreenEnabled = 0;
+    try
+        handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_collect);
+        handles.vlc.AutoPlay = 0;
+        handles.vlc.Toolbar = 0;
+        handles.vlc.FullscreenEnabled = 0;
+    catch err
+        e = errordlg(err.message,'Could not embed VLC');
+        waitfor(e);
+        delete(handles.figure_collect);
+        return;
+    end
     % Create timer
     handles.timer = timer(...
         'ExecutionMode','fixedRate', ...
@@ -198,7 +205,9 @@ function menu_openmedia_Callback(hObject,~)
             error('Could not read duration of media file. The file meta-data may be damaged. Transcoding the streams (e.g., with HandBrake) may fix this problem.');
         end
     catch err
-        msgbox(err.message,'Error loading media file.'); return;
+        e = errordlg(err.message,'Error loading media file.');
+        waitfor(e);
+        return;
     end
     % Update GUI elements
     set(handles.timebar,'Position',[0 0 0 1]);

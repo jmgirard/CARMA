@@ -144,16 +144,23 @@ function fig_collect_vrjoy
     ni = li; ni(2) = ti(2); ni(4) = ti(4);
     set(handles.axis_rating,'LooseInset',ni);
     % Invoke and configure VLC ActiveX Controller
-    handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_collect);
-    handles.vlc.AutoPlay = 0;
-    handles.vlc.Toolbar = 0;
-    handles.vlc.FullscreenEnabled = 0;
+    try
+        handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_collect);
+        handles.vlc.AutoPlay = 0;
+        handles.vlc.Toolbar = 0;
+        handles.vlc.FullscreenEnabled = 0;
+    catch err
+        e = errordlg(err.message,'Could not embed VLC','modal');
+        waitfor(e);
+        delete(handles.figure_collect);
+        return;
+    end
     try
         handles.joy = vrjoystick(1);
-    catch
-        e = errordlg('CARMA could not detect a joystick.','Error','modal');
+    catch err
+        e = errordlg(err.message,'Could not detect joystick','modal');
         waitfor(e);
-        close force;
+        delete(handles.figure_collect);
         return;
     end
     % Create timer

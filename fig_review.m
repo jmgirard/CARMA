@@ -155,10 +155,17 @@ function fig_review
         'Enable','off', ...
         'Callback',@toggle_playpause_Callback);
     % Invoke and configure WMP ActiveX Controller
-    handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_review);
-    handles.vlc.AutoPlay = 0;
-    handles.vlc.Toolbar = 0;
-    handles.vlc.FullscreenEnabled = 0;
+    try
+        handles.vlc = actxcontrol('VideoLAN.VLCPlugin.2',getpixelposition(handles.axis_guide),handles.figure_review);
+        handles.vlc.AutoPlay = 0;
+        handles.vlc.Toolbar = 0;
+        handles.vlc.FullscreenEnabled = 0;
+    catch err
+        e = errordlg(err.message, 'Could not embed VLC');
+        waitfor(e);
+        delete(handles.figure_review);
+        return;
+    end
     % Prepopulate variables
     set(handles.listbox,'String',{'<html><u>Annotation Files</u>'},'Value',1);
     handles.AllFilenames = cell(0,1);
