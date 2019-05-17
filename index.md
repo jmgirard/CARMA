@@ -35,6 +35,7 @@ doi = {10.5334/jors.ar}
 ```
 
 ## Papers Using CARMA
+* Kaczmarek, L. D., Behnke, M., Enko, J., Kosakowski, M., Guzik, P., & Hughes, B. M. (in press). Splitting the affective atom: Divergence of valence and approach-avoidance motivation during a dynamic emotional experience. *Current Psychology*. doi: <https://doi.org/10/gf2trk>
 * Dhamija, S., & Boult, T. E. (2018). Automated action units vs. expert raters: Face off. In *Proceedings of the IEEE Winter Conference on Applications of Computer Vision*.
 * Leins, D. A., Zimmerman, L. A., & Polander, E. N. (2017). Observers' real-time sensitivity to deception in naturalistic interviews. *Journal of Police and Criminal Psychology*. doi: <http://doi.org/10.1007/s11896-017-9224-2>
 * Hammal, Z., Cohn, J. F., Heike, C., & Speltz, M. L. (2015). What can head and facial movements convey about positive and negative affect? In *Proceedings of the International Conference on Affective Computing and Intelligent Interaction*. doi: <http://doi.org/10.1109/ACII.2015.7344584>
