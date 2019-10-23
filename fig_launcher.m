@@ -3,7 +3,7 @@ function fig_launcher
 % License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
     global version;
-	version = 14.03;
+	version = 14.04;
     % Create and center main window
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
     handles.figure_launcher = figure( ...
@@ -60,8 +60,8 @@ function fig_launcher
     pExist = ispref('carma');
     if ~pExist
         addpref('carma', ...
-            {'labLower','labUpper','axMin','axMax','axSteps','cmapval','cmapstr','defdir','srateval','sratenum','bsizeval','bsizenum','update'}, ...
-            {'Negative Affect','Positive Affect',-100,100,9,1,'parula','',2,20,3,1.00,'ask'});
+            {'labLower','labUpper','axMin','axMax','axSteps','axStart','cmapval','cmapstr','defdir','srateval','sratenum','bsizeval','bsizenum','update'}, ...
+            {'Negative Affect','Positive Affect',-100,100,9,0,1,'parula','',2,20,3,1.00,'ask'});
     end
     % Check for updates
     try

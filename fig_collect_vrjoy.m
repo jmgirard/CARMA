@@ -293,6 +293,18 @@ function menu_axisnum_Callback(hObject,~)
         settings.axMin = str2double(numbers{1});
         settings.axMax = str2double(numbers{2});
         settings.axSteps = str2double(numbers{3});
+        if any(isnan([settings.axMin, settings.axMax, settings.axSteps]))
+            warndlg('All values must be entered as numbers.', 'Warning');
+            return;
+        end
+        if settings.axMax <= settings.axMin
+            warndlg('Axis Maximum Value must be greater than Axis Minimum Value.', 'Warning');
+            return;
+        end
+        if settings.axMax <= settings.axMin
+            warndlg('Axis Maximum Value must be greater than Axis Minimum Value.', 'Warning');
+            return;
+        end
         set(handles.axis_rating, ...
             'YLim',[settings.axMin,settings.axMax], ...
             'YTick',round(linspace(settings.axMin,settings.axMax,settings.axSteps),2));

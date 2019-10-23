@@ -1,11 +1,11 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration file="C:\Users\jgirard\Documents\CARMA\CARMA.prj" location="C:\Users\jgirard\Documents\CARMA" name="CARMA" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration file="D:\GitHub\CARMA\CARMA.prj" location="D:\GitHub\CARMA" name="CARMA" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>14.03</param.version>
-    <param.authnamewatermark>Jeffrey M Girard</param.authnamewatermark>
-    <param.email>me@jmgirard.com</param.email>
+    <param.version>14.04</param.version>
+    <param.authnamewatermark />
+    <param.email />
     <param.company />
     <param.summary>CARMA: Software for Continuous Affect Rating and Media Annotation</param.summary>
     <param.description>Source files, releases, documentation, and support are available through http://carma.jmgirard.com</param.description>
@@ -36,7 +36,12 @@
     <param.native.matlab>false</param.native.matlab>
     <param.checkbox>false</param.checkbox>
     <param.example />
-    <param.help.text />
+    <param.help.text>Syntax 
+	  -? 
+	 
+ Input Arguments 
+	 -?  print help on how to use the application 
+	 input arguments</param.help.text>
     <unset>
       <param.icon />
       <param.icons />
@@ -69,7 +74,6 @@
       <param.native.matlab />
       <param.checkbox />
       <param.example />
-      <param.help.text />
     </unset>
     <fileset.main>
       <file>${PROJECT_ROOT}\fig_launcher.m</file>
@@ -92,20 +96,50 @@
       <file>${PROJECT_ROOT}\fig_collect_vrjoy.m</file>
     </fileset.depfun>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="splash.png" optional="false">C:\Users\jgirard\Documents\CARMA\CARMA\for_testing\splash.png</file>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">C:\Users\jgirard\Documents\CARMA\CARMA\for_testing\CARMA.exe</file>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">C:\Users\jgirard\Documents\CARMA\CARMA\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">D:\GitHub\CARMA\CARMA\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">D:\GitHub\CARMA\CARMA\for_testing\CARMA.exe</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="splash.png" optional="false">D:\GitHub\CARMA\CARMA\for_testing\splash.png</file>
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2018a</root>
+      <root>D:\MATLAB</root>
       <toolboxes>
         <toolbox name="matlabcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="gpucoder" />
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="neuralnetwork" />
       </toolboxes>
       <toolbox>
         <matlabcoder>
           <enabled>true</enabled>
         </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <gpucoder>
+          <enabled>true</enabled>
+        </gpucoder>
+      </toolbox>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <neuralnetwork>
+          <enabled>true</enabled>
+        </neuralnetwork>
       </toolbox>
     </matlab>
     <platform>

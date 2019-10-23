@@ -128,10 +128,10 @@ function fig_collect_mouse
     set(handles.text_upper,'String',handles.settings.labUpper);
     axMin = handles.settings.axMin;
     axMax = handles.settings.axMax;
-    axMidpt = axMin + (axMax - axMin)/2;
+    axStart = handles.settings.axStart;
     set(handles.slider, ...
         'SliderStep',[1/40,1/20], ...
-        'Min',axMin,'Max',axMax,'Value',axMidpt);
+        'Min',axMin,'Max',axMax,'Value',axStart);
     % Initialize rating axis
     axes(handles.axis_rating);
     set(handles.axis_rating,'XLim',[0,100],'YLim',[0,100]);
@@ -282,18 +282,40 @@ end
 function menu_axisnum_Callback(hObject,~)
     handles = guidata(hObject);
     settings = handles.settings;
-    prompt = {'Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:'};
-    defaultans = {num2str(settings.axMin),num2str(settings.axMax),num2str(settings.axSteps)};
+    prompt = {'Axis Minimum Value:','Axis Maximum Value:','Number of Axis Steps:','Axis Starting Value:'};
+    defaultans = {num2str(settings.axMin),num2str(settings.axMax),num2str(settings.axSteps),num2str(settings.axStart)};
     numbers = inputdlg(prompt,'',1,defaultans);
     if ~isempty(numbers)
         settings.axMin = str2double(numbers{1});
         settings.axMax = str2double(numbers{2});
         settings.axSteps = str2double(numbers{3});
+        settings.axStart = str2double(numbers{4});
+        if any(isnan([settings.axMin, settings.axMax, settings.axSteps, settings.axStart]))
+            warndlg('All values must be entered as numbers.', 'Warning');
+            return;
+        end
+        if settings.axMax <= settings.axMin
+            warndlg('Axis Maximum Value must be greater than Axis Minimum Value.', 'Warning');
+            return;
+        end
+        if settings.axMax <= settings.axMin
+            warndlg('Axis Maximum Value must be greater than Axis Minimum Value.', 'Warning');
+            return;
+        end
+        if settings.axStart < settings.axMin || settings.axStart > settings.axMax
+            warndlg('Axis Start must be between then Axis Minimum and Axis Maximum Values.', 'Warning');
+            return;
+        end
         set(handles.axis_rating, ...
             'YLim',[settings.axMin,settings.axMax], ...
             'YTick',round(linspace(settings.axMin,settings.axMax,settings.axSteps),2));
         set(handles.plot_patch,'YData',[settings.axMin settings.axMin settings.axMax settings.axMax]);
-        setpref('carma',{'axMin','axMax','axSteps'},{settings.axMin,settings.axMax,settings.axSteps});
+        set(handles.slider, ...
+            'SliderStep',[1/40,1/20], ...
+            'Min',settings.axMin, ...
+            'Max',settings.axMax, ...
+            'Value',settings.axStart);
+        setpref('carma',{'axMin','axMax','axSteps','axStart'},{settings.axMin,settings.axMax,settings.axSteps,settings.axStart});
         handles.settings = settings;
         guidata(handles.figure_collect,handles);
     end
@@ -442,7 +464,7 @@ end
 
 function menu_about_Callback(~,~)
     global version;
-    msgbox(sprintf('CARMA version %.2f\nJeffrey M Girard (c) 2014-2018\nhttp://carma.jmgirard.com\nGNU General Public License v3',version),'About','Help');
+    msgbox(sprintf('CARMA version %.2f\nJeffrey M Girard (c) 2014-2019\nhttp://carma.jmgirard.com\nGNU General Public License v3',version),'About','Help');
 end
 
 % ===============================================================================
