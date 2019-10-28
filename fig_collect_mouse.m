@@ -639,7 +639,7 @@ function program_reset(handles)
     set(handles.menu_closemedia,'Enable','off');
     set(handles.menu_preview,'Enable','off');
     set(handles.menu_help,'Enable','on');
-    set(handles.slider,'Value',get(handles.slider,'Max')-(get(handles.slider,'Max')-get(handles.slider,'Min'))/2);
+    set(handles.slider,'Value',handles.settings.axStart);
     drawnow();
     guidata(handles.figure_collect,handles);
 end
