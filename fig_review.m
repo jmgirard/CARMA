@@ -312,25 +312,11 @@ function addseries_Callback(hObject,~)
     w = waitbar(0,'Importing annotation files...');
     for f = 1:length(filenames)
         filename = filenames{f};
-        [~,~,ext] = fileparts(filename);
-        if strcmp(ext,'.csv')
-            fileID = fopen(fullfile(pathname,filename),'r');
-            axiscell = textscan(fileID,'%*s%f%[^\n\r]',2,'Delimiter',',','HeaderLines',4,'ReturnOnError',false);
-            axis_min = axiscell{1}(1);
-            axis_max = axiscell{1}(2);
-            fclose(fileID);
-            fileID = fopen(fullfile(pathname,filename),'r');
-            datacell = textscan(fileID,'%f%f%[^\n\r]','Delimiter',',','HeaderLines',9,'ReturnOnError',false);
-            secs = datacell{1};
-            ratings = datacell{2};
-            fclose(fileID);
-        else
-            [nums,~] = xlsread(fullfile(pathname,filename),'','','basic');
-            axis_min = nums(5,2);
-            axis_max = nums(6,2);
-            secs = nums(10:end,1);
-            ratings = nums(10:end,2);
-        end
+        raw = readcell(fullfile(pathname,filename));
+        axis_min = raw{5,2};
+        axis_max = raw{6,2};
+        secs = cell2mat(raw(10:end,1));
+        ratings = cell2mat(raw(10:end,2));
         % Get settings from import file
         if isempty(handles.axMin) || isempty(handles.axMax)
             handles.axMin = axis_min;
