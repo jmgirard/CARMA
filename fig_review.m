@@ -47,6 +47,14 @@ function fig_review
         'Label','Analyze Ratings', ...
         'Enable','off', ...
         'Callback',@analyzeratings_Callback);
+    handles.menu_figures = uimenu(handles.figure_review, ...
+        'Label','Figures');
+    handles.menu_dpfig = uimenu(handles.menu_figures, ...
+        'Label','Save Distribution Plot to Image', ...
+        'Callback',{@menu_savefig_Callback,'DP'});
+    handles.menu_tsfig = uimenu(handles.menu_figures, ...
+        'Label','Save Time Series Plots to Image', ...
+        'Callback',{@menu_savefig_Callback,'TS'});
     handles.menu_help = uimenu(handles.figure_review, ...
         'Label','Help');
     handles.menu_about = uimenu(handles.menu_help, ...
@@ -274,6 +282,24 @@ function menu_export_Callback(hObject,~)
     catch err
         errordlg(err.message,'Error saving');
     end
+end
+
+% ===============================================================================
+
+function menu_savefig_Callback(hObject,~,type)
+    handles = guidata(hObject);
+    filter = {'*.png','PNG Image File (.png)';'*.jpg','JPEG Image File (*.jpg)';'*.png;*.jpg;*.gif;*.tiff','Image files (*.png, *.jpg, *.gif, *.tiff)'};
+    [fn, fp, ~] = uiputfile(filter,'Select image file:');
+    pix = getpixelposition(handles.figure_review);
+    figw = pix(3);
+    figh = pix(4);
+    switch type
+        case 'TS'
+            F = getframe(handles.figure_review,[0.02*figw, 0.01*figh, 0.83*figw, 0.40*figh]);
+        case 'DP'
+            F = getframe(handles.figure_review,[0.52*figw, 0.40*figh, 0.325*figw, 0.60*figh]);
+    end
+    imwrite(frame2im(F), fullfile(fp,fn));
 end
 
 % ===============================================================================
