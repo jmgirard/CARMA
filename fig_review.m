@@ -178,8 +178,8 @@ function fig_review
         'Period',0.20, ...
         'TimerFcn',{@timer2_Callback,handles});
     % Save handles to guidata
-    guidata(handles.figure_review,handles);
     handles.figure_review.Visible = 'on';
+    guidata(handles.figure_review,handles);
     addpath('Functions');
 end
 
