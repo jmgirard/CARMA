@@ -3,7 +3,7 @@
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>14.05</param.version>
+    <param.version>14.06</param.version>
     <param.authnamewatermark />
     <param.email />
     <param.company />
@@ -80,7 +80,6 @@
     </fileset.main>
     <fileset.resources>
       <file>${PROJECT_ROOT}\fig_review.m</file>
-      <file>${PROJECT_ROOT}\Functions\cell2csv.m</file>
       <file>${PROJECT_ROOT}\Functions\findjobj.m</file>
       <file>${PROJECT_ROOT}\Functions\ICC_A_1.m</file>
       <file>${PROJECT_ROOT}\Functions\ICC_A_k.m</file>
