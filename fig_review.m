@@ -265,15 +265,14 @@ function menu_export_Callback(hObject,~)
     %Prompt user for output filepath
     [filename,pathname] = uiputfile({'*.csv','Comma-Separated Values (*.csv)'},'Save as',defaultname);
     if isequal(filename,0), return; end
-    % Create export file as a CSV
-    success = cell2csv(fullfile(pathname,filename),output);
-    % Report saving success or failure
-    if success
-        h = msgbox('Export successful.');
-        waitfor(h);
-    else
-        h = msgbox('Export error.');
-        waitfor(h);
+    % Create export file
+    try
+        writecell(output,fullfile(pathname,filename), ...
+            'FileType','text','Delimiter','comma', ...
+            'QuoteStrings',true,'Encoding','UTF-8');
+        msgbox('Export successful.','Success');
+    catch err
+        errordlg(err.message,'Error saving');
     end
 end
 

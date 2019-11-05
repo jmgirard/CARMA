@@ -605,15 +605,14 @@ function timer_Callback(~,~,handles)
                 {'Second'},{'Rating'}; ...
                 {'%%%%%%'},{'%%%%%%'}; ...
                 num2cell(mean_ratings)];
-            % Create export file as a CSV
-            success = cell2csv(fullfile(pathname,filename),output);
-            % Report saving success or failure
-            if success
-                h = msgbox('Export successful.');
-                waitfor(h);
-            else
-                h = msgbox('Export error.');
-                waitfor(h);
+            % Create export file
+            try
+                writecell(output,fullfile(pathname,filename), ...
+                    'FileType','text','Delimiter','comma', ...
+                    'QuoteStrings',true,'Encoding','UTF-8');
+                msgbox('Export successful.','Success');
+            catch err
+                errordlg(err.message,'Error saving');
             end
         end
         program_reset(handles);
