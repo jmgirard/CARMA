@@ -8,8 +8,8 @@ CARMA is a media annotation program that collects continuous ratings while displ
 <table width="100%">
 <tr>
 <td width="33%"><a href="http://i.imgur.com/rnCsBQ7.png"><img src="http://i.imgur.com/rnCsBQ7.png" /></a></td>
-<td width="33%"><a href="https://i.imgur.com/hvjHHxz.png"><img src="https://i.imgur.com/hvjHHxz.png" /></a></td>
-<td width="33%"><a href="https://i.imgur.com/4C2SrK9.png"><img src="https://i.imgur.com/4C2SrK9.png" /></a></td>
+<td width="33%"><a href="http://i.imgur.com/tWrDJPn.png"><img src="http://i.imgur.com/tWrDJPn.png" /></a></td>
+<td width="33%"><a href="http://i.imgur.com/aL2m8lC.png"><img src="http://i.imgur.com/aL2m8lC.png" /></a></td>
 </tr>
 </table>
 
