@@ -179,7 +179,7 @@ function menu_openmedia_Callback(hObject,~)
     handles = guidata(hObject);
     % Reset the GUI elements
     program_reset(handles);
-    global ratings last_ts_vlc last_ts_sys;
+    global ratings last_ts_vlc last_ts_sys event_type event_ts;
     ratings = [];
     last_ts_vlc = 0;
     last_ts_sys = 0;
@@ -204,6 +204,8 @@ function menu_openmedia_Callback(hObject,~)
             handles.vlc.playlist.items.clear();
             error('Could not read duration of media file. The file meta-data may be damaged. Transcoding the streams (e.g., with HandBrake) may fix this problem.');
         end
+        event_type = 'media_open';
+        event_ts = datestr(now, 'YYYY/mm/dd HH:MM:SS:FFF');
     catch err
         e = errordlg(err.message,'Error loading media file.');
         waitfor(e);
@@ -499,6 +501,7 @@ end
 % =========================================================
 
 function toggle_playpause_Callback(hObject,~)
+    global event_type event_ts;
     handles = guidata(hObject);
     if get(hObject,'Value')
         % If toggle button is set to play, update GUI elements
@@ -516,10 +519,14 @@ function toggle_playpause_Callback(hObject,~)
         guidata(hObject,handles);
         % Send play() command to VLC and wait for it to start playing
         handles.vlc.playlist.play();
+        event_type = [event_type, '; media_play'];
+        event_ts = [event_ts, '; ', datestr(now, 'YYYY/mm/dd HH:MM:SS:FFF')];
     else
         % If toggle button is set to pause, send pause() command to VLC
         handles.vlc.playlist.togglePause();
         stop(handles.timer);
+        event_type = [event_type, '; media_pause'];
+        event_ts = [event_ts, '; ', datestr(now, 'YYYY/mm/dd HH:MM:SS:FFF')];
         set(hObject,'String','Resume Rating','Value',0);
         set(handles.menu_help,'Enable','on');
         guidata(hObject,handles);
@@ -530,7 +537,7 @@ end
 
 function timer_Callback(~,~,handles)
     handles = guidata(handles.figure_collect);
-    global ratings last_ts_vlc last_ts_sys global_tic;
+    global ratings last_ts_vlc last_ts_sys global_tic event_type event_ts;
     % While playing
     if handles.vlc.input.state == 3
         ts_vlc = handles.vlc.input.time/1000;
@@ -553,7 +560,8 @@ function timer_Callback(~,~,handles)
     elseif handles.vlc.input.state == 5 || handles.vlc.input.state == 6
         stop(handles.timer);
         handles.vlc.playlist.stop();
-        ts_stop = datestr(now);
+        event_type = [event_type, '; media_end'];
+        event_ts = [event_ts, '; ', datestr(now, 'YYYY/mm/dd HH:MM:SS:FFF')];
         set(handles.toggle_playpause,'Value',0);
         % Average ratings per second of playback
         rating = ratings;
@@ -575,7 +583,7 @@ function timer_Callback(~,~,handles)
         if ~isequal(filename,0) && ~isequal(pathname,0)
             % Add metadata to mean ratings and timestamps
             output = [ ...
-                {'Time at Media End'},{ts_stop}; ...
+                {event_type},{event_ts}; ...
                 {'Multimedia File'},{sprintf('%s%s',defaultname,ext)}; ...
                 {'Lower Label'},{handles.settings.labLower}; ...
                 {'Upper Label'},{handles.settings.labUpper}; ...

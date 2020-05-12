@@ -3,9 +3,9 @@
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>14.06</param.version>
-    <param.authnamewatermark />
-    <param.email />
+    <param.version>14.07</param.version>
+    <param.authnamewatermark>Jeffrey M. Girard</param.authnamewatermark>
+    <param.email>me@jmgirard.com</param.email>
     <param.company />
     <param.summary>CARMA: Software for Continuous Affect Rating and Media Annotation</param.summary>
     <param.description>Source files, releases, documentation, and support are available through http://carma.jmgirard.com</param.description>
@@ -45,8 +45,6 @@
     <unset>
       <param.icon />
       <param.icons />
-      <param.authnamewatermark />
-      <param.email />
       <param.company />
       <param.screenshot />
       <param.guid />
@@ -79,6 +77,10 @@
       <file>${PROJECT_ROOT}\fig_launcher.m</file>
     </fileset.main>
     <fileset.resources>
+      <file>${PROJECT_ROOT}\fig_analyze.m</file>
+      <file>${PROJECT_ROOT}\fig_collect_mouse.m</file>
+      <file>${PROJECT_ROOT}\fig_collect_vrjoy.m</file>
+      <file>${PROJECT_ROOT}\fig_launcher.m</file>
       <file>${PROJECT_ROOT}\fig_review.m</file>
       <file>${PROJECT_ROOT}\Functions\findjobj.m</file>
       <file>${PROJECT_ROOT}\Functions\ICC_A_1.m</file>
@@ -89,11 +91,7 @@
       <file>${PROJECT_ROOT}\Functions\RWG.m</file>
     </fileset.resources>
     <fileset.package />
-    <fileset.depfun>
-      <file>${PROJECT_ROOT}\fig_analyze.m</file>
-      <file>${PROJECT_ROOT}\fig_collect_mouse.m</file>
-      <file>${PROJECT_ROOT}\fig_collect_vrjoy.m</file>
-    </fileset.depfun>
+    <fileset.depfun />
     <build-deliverables>
       <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">D:\GitHub\CARMA\CARMA\for_testing\readme.txt</file>
       <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">D:\GitHub\CARMA\CARMA\for_testing\CARMA.exe</file>
@@ -101,14 +99,10 @@
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>D:\MATLAB</root>
+      <root>C:\Program Files\MATLAB\R2019b</root>
       <toolboxes>
         <toolbox name="matlabcoder" />
-        <toolbox name="embeddedcoder" />
         <toolbox name="gpucoder" />
-        <toolbox name="fixedpoint" />
-        <toolbox name="matlabhdlcoder" />
-        <toolbox name="neuralnetwork" />
       </toolboxes>
       <toolbox>
         <matlabcoder>
@@ -116,29 +110,9 @@
         </matlabcoder>
       </toolbox>
       <toolbox>
-        <embeddedcoder>
-          <enabled>true</enabled>
-        </embeddedcoder>
-      </toolbox>
-      <toolbox>
         <gpucoder>
           <enabled>true</enabled>
         </gpucoder>
-      </toolbox>
-      <toolbox>
-        <fixedpoint>
-          <enabled>true</enabled>
-        </fixedpoint>
-      </toolbox>
-      <toolbox>
-        <matlabhdlcoder>
-          <enabled>true</enabled>
-        </matlabhdlcoder>
-      </toolbox>
-      <toolbox>
-        <neuralnetwork>
-          <enabled>true</enabled>
-        </neuralnetwork>
       </toolbox>
     </matlab>
     <platform>
