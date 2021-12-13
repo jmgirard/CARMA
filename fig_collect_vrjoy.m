@@ -128,7 +128,9 @@ function fig_collect_vrjoy
     axMidpt = axMin + (axMax - axMin)/2;
     axes(handles.axis_rating);
     hold on;
-    c = eval(handles.settings.cmapstr);
+    c1 = interp1([0;1],[1 0 0; 1 1 1],linspace(0,1,128));
+    c2 = interp1([0;1],[1 1 1; 0 1 0],linspace(0,1,128));
+    c = [c1;c2];
     colormap(handles.axis_rating,c);
     handles.plot_patch = patch([0 100 100 0],[axMin axMin axMax axMax],[1 1 2 2]);
     handles.plot_line = plot(handles.axis_rating,[0 100],[axMidpt axMidpt],'-k','LineWidth',5);
@@ -185,7 +187,7 @@ function menu_openmedia_Callback(hObject,~)
     handles = guidata(hObject);
     % Reset the GUI elements
     program_reset(handles);
-    global ratings last_ts_vlc last_ts_sys event_type event_ts;
+    global ratings last_ts_vlc last_ts_sys;
     ratings = [];
     last_ts_vlc = 0;
     last_ts_sys = 0;
@@ -210,8 +212,6 @@ function menu_openmedia_Callback(hObject,~)
             handles.vlc.playlist.items.clear();
             error('Could not read duration of media file. The file meta-data may be damaged. Transcoding the streams (e.g., with HandBrake) may fix this problem.');
         end
-        event_type = 'media_open';
-        event_ts = datestr(now, 'YYYY/mm/dd HH:MM:SS:FFF');
     catch err
         msgbox(err.message,'Error loading media file.'); return;
     end
@@ -334,7 +334,7 @@ function menu_colormap_Callback(hObject,~)
         'Style','popup', ...
         'Units','Normalized', ...
         'Position',[.10 .35 .80 .20], ...
-        'String',{'Parula','Jet','Hot','Cool','Spring','Summer','Autumn','Winter','Bone'}, ...
+        'String',{'Red-White-Green'}, ...
         'Value',settings.cmapval);
     uicontrol(d, ...
         'Style','pushbutton', ...
@@ -354,7 +354,9 @@ function menu_colormap_Callback(hObject,~)
         settings.cmapval = cmapval;
         settings.cmapstr = cmapstr;
         axes(handles.axis_rating);
-        c = eval(cmapstr);
+        c1 = interp1([0;1],[1 0 0; 1 1 1],linspace(0,1,128));
+        c2 = interp1([0;1],[1 1 1; 0 1 0],linspace(0,1,128));
+        c = [c1;c2];
         colormap(handles.axis_rating,c);
         setpref('carma',{'cmapval','cmapstr'},{cmapval,cmapstr});
     end
@@ -497,7 +499,7 @@ end
 
 function toggle_playpause_Callback(hObject,~)
     handles = guidata(hObject);
-    global recording event_type event_ts;
+    global recording;
     if get(hObject,'Value')
         % If toggle button is set to play, update GUI elements
         set(hObject,'Enable','off','String','...');
@@ -513,13 +515,9 @@ function toggle_playpause_Callback(hObject,~)
         guidata(hObject,handles);
         % Send play() command to VLC and wait for it to start playing
         handles.vlc.playlist.play();
-        event_type = [event_type, '; media_play'];
-        event_ts = [event_ts, '; ', datestr(now, 'YYYY/mm/dd HH:MM:SS:FFF')];
     else
         % If toggle button is set to pause, send pause() command to VLC
         handles.vlc.playlist.togglePause();
-        event_type = [event_type, '; media_pause'];
-        event_ts = [event_ts, '; ', datestr(now, 'YYYY/mm/dd HH:MM:SS:FFF')];
         recording = 0;
         set(hObject,'String','Resume Rating','Value',0);
         set(handles.menu_help,'Enable','on');
@@ -531,7 +529,7 @@ end
 
 function timer_Callback(~,~,handles)
     handles = guidata(handles.figure_collect);
-    global ratings last_ts_vlc last_ts_sys global_tic recording event_type event_ts;
+    global ratings last_ts_vlc last_ts_sys global_tic recording;
     % Before playing
     if recording == 0
         [a,~,~] = read(handles.joy); %ranges from -1 to 1
@@ -579,8 +577,7 @@ function timer_Callback(~,~,handles)
     elseif handles.vlc.input.state == 5 || handles.vlc.input.state == 6
         recording = 0;
         handles.vlc.playlist.stop();
-        event_type = [event_type, '; media_end'];
-        event_ts = [event_ts, '; ', datestr(now, 'YYYY/mm/dd HH:MM:SS:FFF')];
+        ts_end = datestr(now);
         set(handles.toggle_playpause,'Value',0);
         % Average ratings per second of playback
         rating = ratings;
@@ -602,7 +599,7 @@ function timer_Callback(~,~,handles)
         if ~isequal(filename,0) && ~isequal(pathname,0)
             % Add metadata to mean ratings and timestamps
             output = [ ...
-                {event_type},{event_ts}; ...
+                {'Time at Media End'},{ts_end}; ...
                 {'Multimedia File'},{sprintf('%s%s',defaultname,ext)}; ...
                 {'Lower Label'},{handles.settings.labLower}; ...
                 {'Upper Label'},{handles.settings.labUpper}; ...

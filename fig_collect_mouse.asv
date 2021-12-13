@@ -135,9 +135,7 @@ function fig_collect_mouse
     % Initialize rating axis
     axes(handles.axis_rating);
     set(handles.axis_rating,'XLim',[0,100],'YLim',[0,100]);
-    c1 = interp1([0;1],[1 0 0; 1 1 1],linspace(0,1,128));
-    c2 = interp1([0;1],[1 1 1; 0 1 0],linspace(0,1,128));
-    c = [c1;c2];
+    c = eval(handles.settings.cmapstr);
     colormap(handles.axis_rating,c);
     handles.plot_patch = patch([0 100 100 0],[axMin axMin axMax axMax],[1 1 2 2]);
     set(handles.axis_rating, ...
@@ -340,7 +338,7 @@ function menu_colormap_Callback(hObject,~)
         'Style','popup', ...
         'Units','Normalized', ...
         'Position',[.10 .35 .80 .20], ...
-        'String',{'Red-White-Green'}, ...
+        'String',{'Red-White-Green', 'Parula','Jet','Hot','Cool','Spring','Summer','Autumn','Winter','Bone'}, ...
         'Value',settings.cmapval);
     uicontrol(d, ...
         'Style','pushbutton', ...
@@ -360,9 +358,12 @@ function menu_colormap_Callback(hObject,~)
         settings.cmapval = cmapval;
         settings.cmapstr = cmapstr;
         axes(handles.axis_rating);
-        c1 = interp1([0;1],[1 0 0; 1 1 1],linspace(0,1,128));
-        c2 = interp1([0;1],[1 1 1; 0 1 0],linspace(0,1,128));
-        c = [c1;c2];
+        c = eval(cmapstr);
+        if (settings.cmapstr == 'Red-White-Green')
+
+            c = 
+
+        end
         colormap(handles.axis_rating,c);
         setpref('carma',{'cmapval','cmapstr'},{cmapval,cmapstr});
     end
