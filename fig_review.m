@@ -78,8 +78,8 @@ function fig_review
     lc = .01; rc = .85;
     handles.axMin = zeros(0,1);
     handles.axMax = zeros(0,1);
-    axMin = -100;
-    axMax = 100;
+    axMin = -2;
+    axMax = +1;
     handles.axis_annotations = axes(handles.figure_review, ...
         'Units','Normalized', ...
         'OuterPosition',[lc+.02 .04+.01 .83-.02 .35-.01], ...

@@ -123,8 +123,8 @@ function fig_collect_vrjoy
     set(handles.text_lower,'String',handles.settings.labLower);
     set(handles.text_upper,'String',handles.settings.labUpper);
     % Plot current value indicator on rating axis
-    axMin = handles.settings.axMin;
-    axMax = handles.settings.axMax;
+    axMin = -2;
+    axMax = +2;
     axMidpt = axMin + (axMax - axMin)/2;
     axes(handles.axis_rating);
     hold on;

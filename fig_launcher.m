@@ -62,26 +62,7 @@ function fig_launcher
     if ~pExist
         addpref('carma', ...
             {'labLower','labUpper','axMin','axMax','axSteps','axStart','cmapval','cmapstr','defdir','srateval','sratenum','bsizeval','bsizenum','update'}, ...
-            {'Negative Affect','Positive Affect',-100,100,9,0,1,'parula','',2,20,3,1.00,'ask'});
-    end
-    % Check for updates
-    try
-        rss = webread('https://github.com/jmgirard/CARMA/releases');
-        index = strfind(rss,'CARMA v');
-        newest = str2double(rss(index(1)+7:index(1)+11));
-        current = version;
-        if current < newest
-            choice = uigetpref('carma','update', ...
-                'New Version', ...
-                {'CARMA has detected that an updated version is available.';'Open the download page in your web browser?'}, ...
-                {'yes','no';'Yes','No'});
-            switch choice
-                case 'yes'
-                    web('https://github.com/jmgirard/CARMA/releases/','-browser');
-                    delete(handles.figure_launcher);
-            end
-        end
-    catch
+            {'Interactive','Interactive',-2,2,9,0,1,'parula','',2,20,3,1.00,'ask'});
     end
 end
 

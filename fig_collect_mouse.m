@@ -124,10 +124,10 @@ function fig_collect_mouse
         'Position',[.01 .09 .86 .89], ...
         'Box','on','XTick',[],'YTick',[],'Color','k');
     % Update axis labels and slider parameters
-    set(handles.text_lower,'String',handles.settings.labLower);
-    set(handles.text_upper,'String',handles.settings.labUpper);
-    axMin = handles.settings.axMin;
-    axMax = handles.settings.axMax;
+    set(handles.text_lower,'String','Interactive');
+    set(handles.text_upper,'String','Interactive');
+    axMin = -2;
+    axMax = +2;
     axStart = handles.settings.axStart;
     set(handles.slider, ...
         'SliderStep',[1/40,1/20], ...
