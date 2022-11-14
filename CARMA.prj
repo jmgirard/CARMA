@@ -1,11 +1,11 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration file="D:\GitHub\CARMA\CARMA.prj" location="D:\GitHub\CARMA" name="CARMA" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration file="C:\Users\j553g371\CARMA\CARMA.prj" location="C:\Users\j553g371\CARMA" name="CARMA" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>CARMA</param.appname>
     <param.icon />
     <param.icons />
-    <param.version>14.08</param.version>
-    <param.authnamewatermark>Jeffrey M. Girard</param.authnamewatermark>
-    <param.email>me@jmgirard.com</param.email>
+    <param.version>14.09</param.version>
+    <param.authnamewatermark />
+    <param.email />
     <param.company />
     <param.summary>CARMA: Software for Continuous Affect Rating and Media Annotation</param.summary>
     <param.description>Source files, releases, documentation, and support are available through http://carma.jmgirard.com</param.description>
@@ -95,14 +95,51 @@
     <fileset.package />
     <fileset.depfun />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">D:\GitHub\CARMA\CARMA\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">D:\GitHub\CARMA\CARMA\for_testing\CARMA.exe</file>
-      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="splash.png" optional="false">D:\GitHub\CARMA\CARMA\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="readme.txt" optional="true">C:\Users\j553g371\CARMA\CARMA\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="CARMA.exe" optional="false">C:\Users\j553g371\CARMA\CARMA\for_testing\CARMA.exe</file>
+      <file location="${PROJECT_ROOT}\CARMA\for_testing" name="splash.png" optional="false">C:\Users\j553g371\CARMA\CARMA\for_testing\splash.png</file>
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>D:\MATLAB</root>
-      <toolboxes />
+      <root>C:\Program Files\MATLAB\R2021a</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="gpucoder" />
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="neuralnetwork" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <gpucoder>
+          <enabled>true</enabled>
+        </gpucoder>
+      </toolbox>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <neuralnetwork>
+          <enabled>true</enabled>
+        </neuralnetwork>
+      </toolbox>
     </matlab>
     <platform>
       <unix>false</unix>

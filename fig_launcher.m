@@ -3,7 +3,7 @@ function fig_launcher
 % License: https://github.com/jmgirard/CARMA/blob/master/license.txt
 
     global version year;
-	version = 14.08;
+	version = 14.09;
     year = 2022;
     % Create and center main window
     defaultBackground = get(0,'defaultUicontrolBackgroundColor');
