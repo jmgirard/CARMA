@@ -492,6 +492,12 @@ function figure_collect_KeyPress(hObject,eventdata)
         handles.vlc.playlist.togglePause();
         stop(handles.timer);
         set(handles.toggle_playpause,'String','Resume Rating','Value',0);
+    elseif strcmp(eventdata.Key,'1') && get(handles.slider,'Value')>=(handles.settings.axSteps + handles.settings.axMin)
+        new_val = get(handles.slider, 'Value') - handles.settings.axSteps;
+        set(handles.slider, 'Value', new_val);
+    elseif strcmp(eventdata.Key,'2') && get(handles.slider,'Value')<=(handles.settings.axMax - handles.settings.axSteps)
+        new_val = get(handles.slider, 'Value') + handles.settings.axSteps;
+        set(handles.slider, 'Value', new_val);
     else
         return;
     end
