@@ -601,10 +601,19 @@ function timer_Callback(~,~,handles)
                 num2cell(mean_ratings)];
             % Create export file
             try
-                writecell(output,fullfile(pathname,filename), ...
+                v = version('-release');
+                if str2double(v(1:4)) >= 2019
+                    writecell(output,fullfile(pathname,filename), ...
                     'FileType','text','Delimiter','comma', ...
                     'QuoteStrings',true,'Encoding','UTF-8');
-                msgbox('Export successful.','Success');
+                    msgbox('Export successful.','Success');
+                else
+                    outputTable = cell2table(output);
+                    writetable(outputTable, fullfile(pathname, filename), ...
+                               'FileType', 'text', 'Delimiter', ',', ...
+                               'QuoteStrings', true, 'Encoding', 'UTF-8');
+                    msgbox('Export successful.','Success');
+                end
             catch err
                 errordlg(err.message,'Error saving');
             end
