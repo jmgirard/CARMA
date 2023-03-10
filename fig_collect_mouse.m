@@ -492,6 +492,12 @@ function figure_collect_KeyPress(hObject,eventdata)
         handles.vlc.playlist.togglePause();
         stop(handles.timer);
         set(handles.toggle_playpause,'String','Resume Rating','Value',0);
+    elseif strcmp(eventdata.Key,'1') && get(handles.slider,'Value')>=(handles.settings.axSteps + handles.settings.axMin)
+        new_val = get(handles.slider, 'Value') - handles.settings.axSteps;
+        set(handles.slider, 'Value', new_val);
+    elseif strcmp(eventdata.Key,'2') && get(handles.slider,'Value')<=(handles.settings.axMax - handles.settings.axSteps)
+        new_val = get(handles.slider, 'Value') + handles.settings.axSteps;
+        set(handles.slider, 'Value', new_val);
     else
         return;
     end
@@ -595,10 +601,19 @@ function timer_Callback(~,~,handles)
                 num2cell(mean_ratings)];
             % Create export file
             try
-                writecell(output,fullfile(pathname,filename), ...
-                    'FileType','text','Delimiter','comma', ...
-                    'QuoteStrings',true,'Encoding','UTF-8');
-                msgbox('Export successful.','Success');
+                v = version('-release');
+                if str2double(v(1:4)) >= 2019
+                    writecell(output,fullfile(pathname,filename), ...
+                        'FileType','text','Delimiter','comma', ...
+                        'QuoteStrings',true,'Encoding','UTF-8');
+                    msgbox('Export successful.','Success');
+                else
+                    outputTable = cell2table(output);
+                    writetable(outputTable, fullfile(pathname, filename), ...
+                               'FileType', 'text', 'Delimiter', ',', ...
+                               'QuoteStrings', true, 'Encoding', 'UTF-8');
+                    msgbox('Export successful.','Success');
+                end
             catch err
                 errordlg(err.message,'Error saving');
             end
