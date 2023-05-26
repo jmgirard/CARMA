@@ -1,6 +1,6 @@
 # CARMA
 Software for Continuous Affect Rating and Media Annotation
-(c) Jeffrey M Girard, 2014-2020
+(c) Jeffrey M Girard, 2014-2023
 
 CARMA is a media annotation program that collects continuous ratings while displaying audio and video files. It is designed to be highly user-friendly and easily customizable. CARMA enables researchers and study participants to provide moment-by-moment ratings of multimedia files using a computer mouse, keyboard, or joystick. The rating scale can be configured on a number of parameters including its labels and numerical range. Annotations can be displayed alongside the multimedia file and saved for easy import into statistical analysis software. CARMA provides a tool for researchers in affective computing, human-computer interaction, and the social sciences who need to capture the unfolding of subjective experience and observable behavior over time.
 
